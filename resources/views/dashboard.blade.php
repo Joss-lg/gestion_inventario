@@ -4,15 +4,11 @@
 @section('header_title', 'Panel General')
 
 @section('content')
-<div class="relative space-y-6">
-
-    <!-- ORBES DE LUZ NEÓN DE FONDO (Le dan vida al Glassmorphism en claro y oscuro) -->
-    <div class="pointer-events-none absolute -top-12 left-6 h-72 w-72 rounded-full bg-indigo-500/25 blur-3xl dark:bg-indigo-500/20"></div>
-    <div class="pointer-events-none absolute top-36 right-6 h-80 w-80 rounded-full bg-emerald-500/20 blur-3xl dark:bg-emerald-500/15"></div>
-    <div class="pointer-events-none absolute top-96 left-1/3 h-80 w-80 rounded-full bg-rose-500/20 blur-3xl dark:bg-rose-500/15"></div>
+<x-app-container>
+<div class="space-y-6">
 
     <!-- BREADCRUMB & HEADER + SELECTOR DE MES -->
-    <div class="relative flex flex-col gap-1">
+    <div class="flex flex-col gap-1">
         <nav class="text-xs font-semibold text-slate-400">
             SCGI <span class="mx-1.5 text-slate-300 dark:text-slate-700">/</span> <span class="font-bold text-slate-600 dark:text-slate-300">Dashboard</span>
         </nav>
@@ -36,7 +32,7 @@
 
     <!-- ALERTA DE STOCK BAJO -->
     @if(isset($lowStockProducts) && $lowStockProducts->count() > 0)
-    <div class="relative space-y-3 rounded-3xl border border-rose-500/30 bg-rose-500/10 p-6 shadow-lg shadow-rose-500/5 backdrop-blur-md dark:border-rose-500/20 dark:bg-rose-950/40">
+    <div class="space-y-3 rounded-3xl border border-rose-500/30 bg-rose-500/10 p-6 shadow-lg shadow-rose-500/5 backdrop-blur-md dark:border-rose-500/20 dark:bg-rose-950/40">
         <div class="flex items-center gap-2 text-xs font-extrabold text-rose-700 dark:text-rose-400">
             <svg class="h-4 w-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
             <span>{{ $lowStockProducts->count() }} productos requieren reposición urgente</span>
@@ -55,7 +51,7 @@
     @endif
 
     <!-- TARJETAS DE MÉTRICAS -->
-    <div class="relative grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
         
         <!-- Valor Total del Inventario -->
         <div class="group flex flex-col justify-between rounded-3xl border border-indigo-500/20 bg-white/60 p-6 shadow-lg shadow-indigo-500/5 backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/80 hover:shadow-indigo-500/10 dark:border-indigo-500/30 dark:bg-slate-900/60 dark:hover:bg-slate-900/80">
@@ -131,7 +127,7 @@
     </div>
 
     <!-- SECCIÓN GRÁFICA: PRODUCTOS MÁS VENDIDOS -->
-    <div class="relative space-y-4 rounded-3xl border border-white/80 bg-white/60 p-6 shadow-lg shadow-slate-500/5 backdrop-blur-md dark:border-slate-800/80 dark:bg-slate-900/60">
+    <div class="space-y-4 rounded-3xl border border-white/80 bg-white/60 p-6 shadow-lg shadow-slate-500/5 backdrop-blur-md dark:border-slate-800/80 dark:bg-slate-900/60">
         <div class="flex items-center justify-between">
             <div>
                 <h3 class="text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white">Productos Más Vendidos ({{ \Carbon\Carbon::parse($selectedMonth)->locale('es')->isoFormat('MMMM YYYY') }})</h3>
@@ -147,7 +143,7 @@
     </div>
 
     <!-- TABLA DE ACTIVIDAD RECIENTE -->
-    <div class="relative overflow-hidden rounded-3xl border border-white/80 bg-white/60 shadow-lg shadow-slate-500/5 backdrop-blur-md dark:border-slate-800/80 dark:bg-slate-900/60">
+    <div class="overflow-hidden rounded-3xl border border-white/80 bg-white/60 shadow-lg shadow-slate-500/5 backdrop-blur-md dark:border-slate-800/80 dark:bg-slate-900/60">
         <div class="flex items-center justify-between border-b border-slate-200/60 p-6 dark:border-slate-800/60">
             <h3 class="text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white">Actividad reciente</h3>
             <span class="text-xs font-bold text-slate-400 dark:text-slate-500">
@@ -239,6 +235,7 @@
     </div>
 
 </div>
+</x-app-container>
 @endsection
 
 @push('scripts')

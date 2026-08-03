@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\CajaMovimiento;
 use App\Models\InventoryMovement;
 use App\Models\Product;
 use Illuminate\Http\Request;
@@ -42,45 +41,34 @@ class StockController extends Controller
 
     public function store(Request $request)
     {
-        // 1. Validamos todos los inputs que vienen del formulario
+        // 1. Bloqueo de seguridad: No se permiten ventas desde el módulo de inventario
+        if ($request->reason === 'Venta directa') {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Las ventas únicamente deben realizarse desde el módulo de Punto de Venta (POS).');
+        }
+
+        // 2. Validamos únicamente los datos necesarios para un movimiento de inventario
         $request->validate([
             'product_id' => 'required|exists:products,id',
             'quantity' => 'required|integer|min:1',
             'type' => 'required|in:entrada,salida',
-            'reason' => 'required|string',
-            'precio_unitario' => 'nullable|numeric|min:0',
-            'monto_recibido' => 'nullable|numeric|min:0',
+            'reason' => 'required|string|max:255',
+            'notes' => 'nullable|string|max:500',
         ]);
 
         $user = auth()->user();
-        $cajaActiva = null;
-
-        // 2. Si es Venta directa, verificamos la caja abierta y que el dinero recibido alcance
-        if ($request->type === 'salida' && $request->reason === 'Venta directa') {
-            $cajaActiva = CajaMovimiento::where('user_id', $user->id)
-                ->where('estado', 'abierta')
-                ->first();
-
-            if (! $cajaActiva) {
-                return redirect()->back()->withInput()->with('error', 'Debes abrir un turno de caja antes de realizar una Venta Directa.');
-            }
-
-            $totalVenta = $request->quantity * ($request->precio_unitario ?? 0);
-            if (($request->monto_recibido ?? 0) < $totalVenta) {
-                return redirect()->back()->withInput()->with('error', 'El dinero recibido es menor al total a cobrar.');
-            }
-        }
 
         try {
-            DB::transaction(function () use ($request, $user, $cajaActiva) {
-                // 3. Obtenemos el producto PRIMERO para tener acceso a sus datos
-                $product = Product::findOrFail($request->product_id);
+            DB::transaction(function () use ($request, $user) {
+                // 3. Obtenemos el producto con bloqueo para evitar inconsistencias
+                $product = Product::lockForUpdate()->findOrFail($request->product_id);
                 $cantidad = (int) $request->quantity;
 
-                // 4. Actualizamos el stock y validamos existencias
+                // 4. Actualizamos el stock y validamos existencias disponibles
                 if ($request->type === 'salida') {
                     if ($product->stock < $cantidad) {
-                        throw new \Exception("Stock insuficiente. Stock actual: {$product->stock} pzas.");
+                        throw new \Exception("Stock insuficiente. Stock actual disponible: {$product->stock} pzas.");
                     }
                     $product->stock -= $cantidad;
                 } else {
@@ -88,32 +76,22 @@ class StockController extends Controller
                 }
                 $product->save();
 
-                // 5. Preparamos montos para el registro
-                $precioUnitario = $request->precio_unitario ?? 0;
-                $totalCalculado = ($request->type === 'salida' && $request->reason === 'Venta directa')
-                    ? ($cantidad * $precioUnitario)
-                    : 0;
-
-                $montoRecibido = $request->monto_recibido ?? 0;
-                $cambioEntregado = $montoRecibido > 0 ? ($montoRecibido - $totalCalculado) : 0;
-
-                // 6. Guardamos el registro con variables ya definidas
+                // 5. Guardamos el movimiento de inventario puro
                 InventoryMovement::create([
                     'product_id' => $product->id,
                     'user_id' => $user->id,
-                    'caja_id' => $cajaActiva ? $cajaActiva->id : null,
+                    'caja_id' => null, // Los movimientos manuales de inventario no afectan la caja activa
                     'type' => $request->type,
                     'quantity' => $cantidad,
                     'reason' => $request->reason,
-                    'unit_price' => $precioUnitario,
-                    'total' => $totalCalculado,
-                    'monto_recibido' => $montoRecibido,
-                    'cambio' => $cambioEntregado,
+                    'unit_price' => $product->price, // Se guarda como referencia
+                    'total' => 0, // No genera monto económico en caja
+                    'notes' => $request->notes ?? null,
                     'date' => now(),
                 ]);
             });
 
-            return redirect()->route('stock.index')->with('success', 'Movimiento registrado correctamente.');
+            return redirect()->route('stock.index')->with('success', 'Movimiento de inventario registrado correctamente.');
 
         } catch (\Exception $e) {
             return redirect()->back()->withInput()->with('error', $e->getMessage());

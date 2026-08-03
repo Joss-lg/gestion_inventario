@@ -15,7 +15,7 @@
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mt-1">
             <div>
                 <h1 class="page-title">Movimientos de Stock</h1>
-                <p class="page-subtitle">Registra entradas y salidas de mercancía para el control del taller</p>
+                <p class="page-subtitle">Registra entradas y salidas operativas para el control del taller</p>
             </div>
             <button type="button" @click="openCreateModal()" class="btn-primary w-full sm:w-auto uppercase tracking-wider cursor-pointer">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
@@ -198,12 +198,11 @@
                     <label class="form-label">Producto</label>
                     <select name="product_id" 
                             x-model="currentMovement.product_id"
-                            @change="onProductChange($event)"
                             required
                             class="form-input cursor-pointer">
                         <option value="" disabled selected>Selecciona un artículo...</option>
                         @foreach($products as $product)
-                            <option value="{{ $product->id }}" data-price="{{ $product->price ?? $product->precio ?? 0 }}">
+                            <option value="{{ $product->id }}">
                                 {{ $product->name }} (Stock actual: {{ $product->stock }})
                             </option>
                         @endforeach
@@ -216,7 +215,7 @@
                     <div class="grid grid-cols-2 gap-3">
                         <label class="relative flex flex-col p-3.5 rounded-2xl border-2 cursor-pointer transition-all duration-200"
                                :class="currentMovement.type === 'entrada' ? 'border-emerald-500 bg-emerald-500/10 shadow-lg shadow-emerald-500/10' : 'border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-[#070a11] hover:border-slate-300 dark:hover:border-slate-700'">
-                            <input type="radio" name="type" value="entrada" x-model="currentMovement.type" class="sr-only">
+                            <input type="radio" name="type" value="entrada" x-model="currentMovement.type" @change="currentMovement.reason_preset = ''" class="sr-only">
                             <span class="text-xs font-black text-slate-900 dark:text-white flex items-center gap-2">
                                 <span class="w-2 h-2 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500"></span>
                                 Entrada
@@ -226,7 +225,7 @@
 
                         <label class="relative flex flex-col p-3.5 rounded-2xl border-2 cursor-pointer transition-all duration-200"
                                :class="currentMovement.type === 'salida' ? 'border-rose-500 bg-rose-500/10 shadow-lg shadow-rose-500/10' : 'border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-[#070a11] hover:border-slate-300 dark:hover:border-slate-700'">
-                            <input type="radio" name="type" value="salida" x-model="currentMovement.type" class="sr-only">
+                            <input type="radio" name="type" value="salida" x-model="currentMovement.type" @change="currentMovement.reason_preset = ''" class="sr-only">
                             <span class="text-xs font-black text-slate-900 dark:text-white flex items-center gap-2">
                                 <span class="w-2 h-2 rounded-full bg-rose-500 shadow-sm shadow-rose-500"></span>
                                 Salida
@@ -263,7 +262,6 @@
 
                         <template x-if="currentMovement.type === 'salida'">
                             <optgroup label="Motivos de Salida">
-                                <option value="Venta directa">Venta directa</option>
                                 <option value="Uso en servicio / taller">Uso en servicio / taller</option>
                                 <option value="Pieza dañada o defectuosa">Pieza dañada o defectuosa</option>
                                 <option value="Ajuste por inventario físico">Ajuste por inventario físico</option>
@@ -274,7 +272,7 @@
                     </select>
 
                     <div x-show="currentMovement.reason_preset === 'Otro'" class="mt-2">
-                        <input type="number" 
+                        <input type="text" 
                                x-model="currentMovement.reason_custom"
                                :required="currentMovement.reason_preset === 'Otro'"
                                placeholder="Escribe el motivo personalizado..." 
@@ -284,41 +282,14 @@
                     <input type="hidden" name="reason" :value="finalReason">
                 </div>
 
-                {{-- BLOQUE VENTA DIRECTA --}}
-                <div x-show="currentMovement.type === 'salida' && currentMovement.reason_preset === 'Venta directa'"
-                     class="p-4 bg-gradient-to-br from-indigo-500/10 to-purple-500/5 border border-indigo-500/20 rounded-2xl space-y-3">
-                    
-                    <div class="flex items-center justify-between border-b border-indigo-500/20 pb-2">
-                        <span class="text-xs font-black text-indigo-400 uppercase tracking-wider">Detalles de Cobro</span>
-                        <span class="text-xs font-black text-indigo-400">Total: $<span x-text="totalCobro.toFixed(2)"></span></span>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label class="form-label !text-[10px]">PRECIO UNITARIO ($)</label>
-                            <input type="number" step="0.01" min="0" 
-                                   name="precio_unitario"
-                                   x-model.number="currentMovement.precio_unitario"
-                                   class="form-input !py-2">
-                        </div>
-
-                        <div>
-                            <label class="form-label !text-[10px]">DINERO RECIBIDO ($)</label>
-                            <input type="number" step="0.01" min="0" 
-                                   name="monto_recibido"
-                                   x-model.number="currentMovement.monto_recibido"
-                                   placeholder="0.00"
-                                   class="form-input !py-2">
-                        </div>
-                    </div>
-
-                    <div class="flex items-center justify-between pt-1">
-                        <span class="text-xs font-bold text-slate-300">Cambio a entregar:</span>
-                        <span class="text-base font-black" 
-                              :class="cambioCalculado < 0 ? 'text-rose-400' : 'text-emerald-400'">
-                            $<span x-text="cambioCalculado >= 0 ? cambioCalculado.toFixed(2) : '0.00'"></span>
-                        </span>
-                    </div>
+                {{-- NOTAS / OBSERVACIONES --}}
+                <div class="space-y-1.5">
+                    <label class="form-label">Notas u Observaciones (Opcional)</label>
+                    <textarea name="notes" 
+                              x-model="currentMovement.notes" 
+                              rows="2" 
+                              placeholder="Detalles adicionales del movimiento..."
+                              class="form-input resize-none"></textarea>
                 </div>
 
             </div>

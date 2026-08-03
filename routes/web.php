@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\CajaController;
+use App\Http\Controllers\CatalogController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProductController;
@@ -60,11 +61,19 @@ Route::middleware('auth')->group(function () {
      */
     Route::middleware('caja.abierta')->group(function () {
 
-        // Categorías de Productos
+        // 🛒 Punto de Venta (POS) - Requiere tener la caja abierta para vender
+        Route::get('/caja/pos', [CajaController::class, 'pos'])->name('caja.pos');
+        Route::post('/caja/venta', [CajaController::class, 'registrarVenta'])->name('caja.venta');
+
+        // 💸 Registro de Gastos / Salidas de Caja
+        Route::post('/caja/gastos', [CajaController::class, 'storeGasto'])->name('caja.gastos.store');
+
+        // Categorías de Productos y Catálogo
         Route::middleware('permission:manage-categories')->group(function () {
             Route::get('/categorias', [CategoryController::class, 'index'])->name('categories.index');
             Route::post('/categorias', [CategoryController::class, 'store'])->name('categories.store');
             Route::put('/categorias/{category}', [CategoryController::class, 'update'])->name('categories.update');
+            Route::get('/catalogo', [CatalogController::class, 'index'])->name('catalogo.index');
         });
 
         // Productos del Catálogo

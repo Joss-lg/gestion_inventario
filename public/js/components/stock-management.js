@@ -1,6 +1,6 @@
 document.addEventListener('alpine:init', () => {
     Alpine.data('stockManagement', () => ({
-        // Objeto de modales para sincronizar con <x-modal name="create">
+        // Objeto de modales
         modals: {
             create: false
         },
@@ -13,8 +13,7 @@ document.addEventListener('alpine:init', () => {
             quantity: 1,
             reason_preset: '',
             reason_custom: '',
-            precio_unitario: 0,
-            monto_recibido: ''
+            notes: ''
         },
 
         init() {
@@ -40,12 +39,14 @@ document.addEventListener('alpine:init', () => {
         openCreateModal() {
             this.resetForm();
             this.modals.create = true;
+            this.$dispatch('open-modal', 'create');
         },
 
         closeModal(name) {
             if (this.modals[name] !== undefined) {
                 this.modals[name] = false;
             }
+            this.$dispatch('close-modal', name);
         },
 
         resetForm() {
@@ -55,15 +56,8 @@ document.addEventListener('alpine:init', () => {
                 quantity: 1,
                 reason_preset: '',
                 reason_custom: '',
-                precio_unitario: 0,
-                monto_recibido: ''
+                notes: ''
             };
-        },
-
-        onProductChange(event) {
-            const selectedOption = event.target.options[event.target.selectedIndex];
-            const price = parseFloat(selectedOption.dataset.price) || 0;
-            this.currentMovement.precio_unitario = price;
         },
 
         get finalReason() {
@@ -71,17 +65,6 @@ document.addEventListener('alpine:init', () => {
                 return this.currentMovement.reason_custom;
             }
             return this.currentMovement.reason_preset;
-        },
-
-        get totalCobro() {
-            const qty = parseFloat(this.currentMovement.quantity) || 0;
-            const price = parseFloat(this.currentMovement.precio_unitario) || 0;
-            return qty * price;
-        },
-
-        get cambioCalculado() {
-            const recibido = parseFloat(this.currentMovement.monto_recibido) || 0;
-            return recibido - this.totalCobro;
         }
     }));
 });

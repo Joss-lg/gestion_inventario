@@ -18,6 +18,23 @@
     display: none !important; 
 }
 
+/* ==========================================================================
+   ELIMINACIÓN TOTAL DE BARRAS DE SCROLL EN CUALQUIER ELEMENTO (*)
+   ========================================================================== */
+
+/* Firefox, IE y Edge para todos los elementos */
+* {
+    -ms-overflow-style: none !important;
+    scrollbar-width: none !important;
+}
+
+/* Webkit (Chrome, Safari, Brave, Edge) para todos los elementos */
+*::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+}
+
 @utility backdrop-blur-md {
     -webkit-backdrop-filter: blur(12px);
     backdrop-filter: blur(12px);
@@ -102,27 +119,22 @@
     @apply fixed inset-0 z-50 bg-[#030509]/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-5 overflow-hidden;
 }
 
-/* Contenedor principal con efecto Glow Radial y esquinas ultra redondeadas */
 @utility modal-box {
     @apply relative w-full max-w-2xl max-h-[90vh] bg-[#070a13] text-slate-100 rounded-[28px] border border-[#1b2338] shadow-[0_25px_60px_rgba(0,0,0,0.9)] flex flex-col overflow-hidden my-auto transform transition-all;
 }
 
-/* Luces de fondo (Glow Effect de la esquina) */
 @utility modal-glow {
     @apply pointer-events-none absolute -top-24 -left-24 w-80 h-80 bg-indigo-600/25 rounded-full blur-3xl;
 }
 
-/* Encabezado sin divisiones de color raras */
 @utility modal-header {
     @apply relative z-10 flex items-center justify-between p-6 pb-2 shrink-0 bg-transparent;
 }
 
-/* Cuerpo central con scroll invisible nativo */
 @utility modal-body {
     @apply relative z-10 px-6 py-4 space-y-5 overflow-y-auto flex-1 min-h-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden;
 }
 
-/* Pie de botones integrado */
 @utility modal-footer {
     @apply relative z-10 flex items-center justify-end gap-3 p-6 pt-2 shrink-0 bg-transparent;
 }
