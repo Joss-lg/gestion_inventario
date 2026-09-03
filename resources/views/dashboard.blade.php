@@ -5,7 +5,7 @@
 
 @section('content')
 <x-app-container>
-<div class="space-y-6">
+<div class="space-y-6 mx-auto max-w-7xl w-full">
 
     <!-- BREADCRUMB & HEADER + SELECTOR DE MES -->
     <div class="flex flex-col gap-1">
@@ -25,7 +25,7 @@
                 <label for="month" class="pl-2 text-xs font-bold text-slate-500 dark:text-slate-400">Mes:</label>
                 <input type="month" name="month" id="month" value="{{ $selectedMonth }}" 
                     onchange="this.form.submit()"
-                    class="w-full cursor-pointer rounded-xl border border-slate-200/80 bg-white/70 px-3 py-1.5 text-xs font-bold text-slate-700 shadow-2xs focus:ring-2 focus:ring-indigo-500/50 focus:outline-hidden dark:border-slate-700/60 dark:bg-slate-800/70 dark:text-slate-200 sm:w-auto">
+                    class="w-full cursor-pointer rounded-xl border border-slate-200/80 bg-white/70 px-3 py-1.5 text-xs font-bold text-slate-700 shadow-2xs focus:ring-2 focus:ring-[#FF6B4A]/50 focus:outline-hidden dark:border-slate-700/60 dark:bg-slate-800/70 dark:text-slate-200 sm:w-auto">
             </form>
         </div>
     </div>
@@ -53,11 +53,12 @@
     <!-- TARJETAS DE MÉTRICAS -->
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
         
-        <!-- Valor Total del Inventario -->
-        <div class="group flex flex-col justify-between rounded-3xl border border-indigo-500/20 bg-white/60 p-6 shadow-lg shadow-indigo-500/5 backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/80 hover:shadow-indigo-500/10 dark:border-indigo-500/30 dark:bg-slate-900/60 dark:hover:bg-slate-900/80">
+        <!-- Valor Total del Inventario (tarjeta principal de marca) -->
+        <div class="group relative flex flex-col justify-between overflow-hidden rounded-3xl border border-[#FF6B4A]/30 bg-gradient-to-br from-[#FFF4EE] via-white to-white p-6 shadow-lg shadow-[#FF6B4A]/10 backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[#FF6B4A]/20 dark:border-[#FF6B4A]/30 dark:!bg-none dark:bg-slate-900/60">
+            <div class="absolute inset-y-0 left-0 w-1.5 bg-gradient-to-b from-[#FF4500] to-[#FF6B4A]"></div>
             <div class="mb-4 flex items-center justify-between">
-                <div class="flex h-10 w-10 items-center justify-center rounded-2xl border border-indigo-500/30 bg-indigo-500/10 text-lg font-bold text-indigo-600 shadow-inner dark:text-indigo-400">$</div>
-                <span class="rounded-xl border border-indigo-500/30 bg-indigo-500/10 px-2.5 py-1 text-[9px] font-black uppercase tracking-wider text-indigo-700 dark:text-indigo-300">Sistema</span>
+                <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-[#FF4500] to-[#FF6B4A] text-lg font-bold text-white shadow-md shadow-[#FF6B4A]/30">$</div>
+                <span class="rounded-xl border border-[#FF6B4A]/30 bg-[#FF6B4A]/10 px-2.5 py-1 text-[9px] font-black uppercase tracking-wider text-[#C94A2E] dark:text-[#FFAB91]">Sistema</span>
             </div>
             <div>
                 <span class="text-xl font-black tracking-tight text-slate-900 dark:text-white sm:text-2xl">${{ number_format($totalInventoryValue ?? 0, 2) }}</span>
@@ -106,19 +107,19 @@
             </div>
         </div>
 
-        <!-- PRODUCTO MÁS VENDIDO DEL MES -->
-        <div class="group flex flex-col justify-between rounded-3xl border border-amber-500/20 bg-white/60 p-6 shadow-lg shadow-amber-500/5 backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/80 hover:shadow-amber-500/10 dark:border-amber-500/30 dark:bg-slate-900/60 dark:hover:bg-slate-900/80 sm:col-span-2 lg:col-span-1">
+        <!-- PRODUCTO MÁS VENDIDO DEL MES (acento de marca) -->
+        <div class="group flex flex-col justify-between rounded-3xl border border-[#FF6B4A]/25 bg-white/60 p-6 shadow-lg shadow-[#FF6B4A]/10 backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/80 hover:shadow-[#FF6B4A]/20 dark:border-[#FF6B4A]/30 dark:bg-slate-900/60 dark:hover:bg-slate-900/80 sm:col-span-2 lg:col-span-1">
             <div class="mb-2 flex items-center justify-between">
-                <div class="flex h-10 w-10 items-center justify-center rounded-2xl border border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                <div class="flex h-10 w-10 items-center justify-center rounded-2xl border border-[#FF6B4A]/30 bg-[#FF6B4A]/10 text-[#FF4500] dark:text-[#FF8A65]">
                     <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.690h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.690l1.519-4.674z"/></svg>
                 </div>
-                <span class="rounded-xl border border-amber-500/30 bg-amber-500/10 px-2.5 py-1 text-[9px] font-black uppercase tracking-wider text-amber-700 dark:text-amber-300">Top Mes</span>
+                <span class="rounded-xl border border-[#FF6B4A]/30 bg-[#FF6B4A]/10 px-2.5 py-1 text-[9px] font-black uppercase tracking-wider text-[#C94A2E] dark:text-[#FFAB91]">Top Mes</span>
             </div>
             <div>
                 <span class="block truncate text-sm font-black tracking-tight text-slate-900 dark:text-white">
                     {{ $mostSoldProduct->product->name ?? 'Sin ventas en el mes' }}
                 </span>
-                <p class="mt-0.5 text-xs font-bold text-amber-600 dark:text-amber-400">
+                <p class="mt-0.5 text-xs font-bold text-[#FF4500] dark:text-[#FF8A65]">
                     {{ $mostSoldProduct->total_quantity ?? 0 }} unidades vendidas
                 </p>
             </div>
@@ -142,8 +143,8 @@
         </div>
     </div>
 
-    <!-- TABLA DE ACTIVIDAD RECIENTE -->
-    <div class="overflow-hidden rounded-3xl border border-white/80 bg-white/60 shadow-lg shadow-slate-500/5 backdrop-blur-md dark:border-slate-800/80 dark:bg-slate-900/60">
+    <!-- TABLA DE ACTIVIDAD RECIENTE (CENTRADA Y DISTRIBUIDA) -->
+    <div class="overflow-hidden rounded-3xl border border-white/80 bg-white/60 shadow-lg shadow-slate-500/5 backdrop-blur-md dark:border-slate-800/80 dark:bg-slate-900/60 mx-auto w-full">
         <div class="flex items-center justify-between border-b border-slate-200/60 p-6 dark:border-slate-800/60">
             <h3 class="text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white">Actividad reciente</h3>
             <span class="text-xs font-bold text-slate-400 dark:text-slate-500">
@@ -162,12 +163,12 @@
                         @if(($activity->type ?? '') === 'entrada')
                             <span class="inline-flex items-center gap-1 rounded-md border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-[9px] font-bold text-emerald-700 dark:text-emerald-400">ENTRADA</span>
                         @else
-                            <span class="inline-flex items-center gap-1 rounded-md border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-[9px] font-bold text-amber-700 dark:text-amber-400">SALIDA</span>
+                            <span class="inline-flex items-center gap-1 rounded-md border border-[#FF6B4A]/30 bg-[#FF6B4A]/10 px-2 py-0.5 text-[9px] font-bold text-[#C94A2E] dark:text-[#FFAB91]">SALIDA</span>
                         @endif
                     </div>
                     <div class="flex items-center justify-between font-mono text-[11px] text-slate-500 dark:text-slate-400">
                         <span>SKU: {{ $activity->product->sku ?? 'N/D' }}</span>
-                        <span class="text-xs font-bold {{ ($activity->type ?? '') === 'entrada' ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400' }}">
+                        <span class="text-xs font-bold {{ ($activity->type ?? '') === 'entrada' ? 'text-emerald-600 dark:text-emerald-400' : 'text-[#FF4500] dark:text-[#FF8A65]' }}">
                             {{ ($activity->type ?? '') === 'entrada' ? '+' : '-' }}{{ $activity->quantity ?? 0 }} pza(s)
                         </span>
                     </div>
@@ -183,9 +184,9 @@
             @endforelse
         </div>
 
-        <!-- VISTA DE TABLA TRADICIONAL -->
+        <!-- VISTA DE TABLA TRADICIONAL (SIMÉTRICA) -->
         <div class="hidden w-full overflow-x-auto sm:block">
-            <table class="w-full border-collapse text-left">
+            <table class="w-full border-collapse text-left table-auto">
                 <thead>
                     <tr class="border-b border-slate-200/80 bg-slate-50/50 text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:border-slate-800/80 dark:bg-slate-950/40 dark:text-slate-500">
                         <th class="py-4 px-6">Fecha</th>
@@ -199,7 +200,7 @@
                 <tbody class="divide-y divide-slate-100/80 text-xs font-medium text-slate-600 dark:divide-slate-800/60 dark:text-slate-300">
                     @forelse($recentActivities ?? [] as $activity)
                         <tr class="transition-colors hover:bg-slate-50/60 dark:hover:bg-slate-800/30">
-                            <td class="whitespace-nowrap font-mono text-[11px] text-slate-400 dark:text-slate-500">
+                            <td class="whitespace-nowrap py-4 px-6 font-mono text-[11px] text-slate-400 dark:text-slate-500">
                                 {{ $activity->created_at ? $activity->created_at->isoFormat('DD MMM YYYY') : '' }}
                             </td>
                             <td class="py-4 px-6 font-bold text-slate-900 dark:text-white">
@@ -212,10 +213,10 @@
                                 @if(($activity->type ?? '') === 'entrada')
                                     <span class="inline-flex items-center gap-1 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1 text-[10px] font-bold text-emerald-700 dark:text-emerald-400">ENTRADA</span>
                                 @else
-                                    <span class="inline-flex items-center gap-1 rounded-xl border border-amber-500/30 bg-amber-500/10 px-2.5 py-1 text-[10px] font-bold text-amber-700 dark:text-amber-400">SALIDA</span>
+                                    <span class="inline-flex items-center gap-1 rounded-xl border border-[#FF6B4A]/30 bg-[#FF6B4A]/10 px-2.5 py-1 text-[10px] font-bold text-[#C94A2E] dark:text-[#FFAB91]">SALIDA</span>
                                 @endif
                             </td>
-                            <td class="whitespace-nowrap py-4 px-6 font-bold {{ ($activity->type ?? '') === 'entrada' ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400' }}">
+                            <td class="whitespace-nowrap py-4 px-6 font-bold {{ ($activity->type ?? '') === 'entrada' ? 'text-emerald-600 dark:text-emerald-400' : 'text-[#FF4500] dark:text-[#FF8A65]' }}">
                                 {{ ($activity->type ?? '') === 'entrada' ? '+' : '-' }}{{ $activity->quantity ?? 0 }}
                             </td>
                             <td class="whitespace-nowrap py-4 px-6 text-right font-bold text-slate-700 dark:text-slate-300">

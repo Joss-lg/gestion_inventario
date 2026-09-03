@@ -14,7 +14,7 @@ class RolesAndUsersSeeder extends Seeder
     {
         // 1. Crear Roles
         $adminRole = Role::create(['name' => 'Administrador']);
-        $operatorRole = Role::create(['name' => 'Operador']);
+        $cajeroRole = Role::create(['name' => 'Cajero']);
 
         // 2. Crear los 7 Permisos Exactos de la Interfaz
         $permissions = [
@@ -44,14 +44,15 @@ class RolesAndUsersSeeder extends Seeder
         ]);
         $admin->permissions()->attach(Permission::pluck('id'));
 
-        // 4. Crear Operador (Acceso limitado)
+        // 4. Crear cajero (Acceso limitado)
         $operator = User::create([
-            'name' => 'operador1',
-            'email' => 'operador@scgi.mx',
+            'name' => 'cajero1',
+            'email' => 'cajero@scgi.mx',
             'password' => Hash::make('password123'),
-            'role_id' => $operatorRole->id,
+            'role_id' => $cajeroRole->id,
             'is_active' => true,
         ]);
+        
         // Solo asociamos registrar entradas y salidas como muestra inicial (1/7)
         $movPerm = Permission::where('slug', 'register-movements')->first();
         $operator->permissions()->attach($movPerm->id);

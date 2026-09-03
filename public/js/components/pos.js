@@ -3,16 +3,20 @@ document.addEventListener('alpine:init', () => {
         products: window.posData ? window.posData.products : [],
         storeUrl: window.posData ? window.posData.storeUrl : '',
         csrfToken: window.posData ? window.posData.csrfToken : '',
-        
+
         search: '',
         selectedCategory: 'all',
         cart: [],
         paymentMethod: 'efectivo',
         receivedAmount: '',
+        referenceNumber: '',
         loading: false,
 
+        // === ESTADO DEL TICKET ===
+        showTicket: false,
+        lastTicket: null,
+
         init() {
-            // Foco automático en el buscador al cargar el componente
             this.$nextTick(() => {
                 if (this.$refs.searchInput) {
                     this.$refs.searchInput.focus();
@@ -22,9 +26,9 @@ document.addEventListener('alpine:init', () => {
 
         get filteredProducts() {
             return this.products.filter(product => {
-                const matchesCategory = this.selectedCategory === 'all' || product.category_id === this.selectedCategory;
+                const matchesCategory = this.selectedCategory === 'all' || product.category_id == this.selectedCategory;
                 const searchLower = this.search.toLowerCase();
-                const matchesSearch = product.name.toLowerCase().includes(searchLower) || 
+                const matchesSearch = product.name.toLowerCase().includes(searchLower) ||
                                      (product.sku && product.sku.toLowerCase().includes(searchLower));
                 return matchesCategory && matchesSearch;
             });
@@ -39,7 +43,6 @@ document.addEventListener('alpine:init', () => {
             return received - this.total;
         },
 
-        // Métodos de ayuda para insignias de interfaz
         getStockBadge(stock) {
             if (stock <= 0) {
                 return {
@@ -69,7 +72,6 @@ document.addEventListener('alpine:init', () => {
         },
 
         addToCart(product) {
-            // 1. VALIDACIÓN: Producto Agotado
             if (product.stock <= 0) {
                 Swal.fire({
                     icon: 'error',
@@ -83,10 +85,8 @@ document.addEventListener('alpine:init', () => {
                 return;
             }
 
-            // CORRECCIÓN AQUÍ: Usar == en lugar de === para evitar duplicados por tipo de dato
             const existingIndex = this.cart.findIndex(item => item.id == product.id);
 
-            // 2. VALIDACIÓN: Superar stock en carrito
             if (existingIndex > -1) {
                 if (this.cart[existingIndex].quantity + 1 > product.stock) {
                     Swal.fire({
@@ -102,7 +102,6 @@ document.addEventListener('alpine:init', () => {
                 }
                 this.cart[existingIndex].quantity++;
             } else {
-                // Notificación emergente si el producto agregado tiene stock crítico
                 if (product.stock <= 5) {
                     Swal.fire({
                         icon: 'warning',
@@ -156,6 +155,7 @@ document.addEventListener('alpine:init', () => {
         clearCart() {
             this.cart = [];
             this.receivedAmount = '';
+            this.referenceNumber = '';
         },
 
         formatNumber(value) {
@@ -163,6 +163,15 @@ document.addEventListener('alpine:init', () => {
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2
             }).format(value || 0);
+        },
+
+        formatMetodo(metodo) {
+            const map = { efectivo: 'Efectivo', tarjeta: 'Tarjeta', transferencia: 'Transferencia' };
+            return map[metodo] || metodo;
+        },
+
+        printTicket() {
+            window.print();
         },
 
         async processSale() {
@@ -173,6 +182,16 @@ document.addEventListener('alpine:init', () => {
                     icon: 'error',
                     title: 'Monto insuficiente',
                     text: 'El efectivo recibido es menor al total a pagar.',
+                    confirmButtonColor: '#4f46e5'
+                });
+                return;
+            }
+
+            if ((this.paymentMethod === 'tarjeta' || this.paymentMethod === 'transferencia') && !this.referenceNumber.trim()) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Referencia requerida',
+                    text: `Por favor ingresa el número de ${this.paymentMethod === 'tarjeta' ? 'voucher / autorización' : 'referencia / rastreo'}.`,
                     confirmButtonColor: '#4f46e5'
                 });
                 return;
@@ -192,6 +211,7 @@ document.addEventListener('alpine:init', () => {
                         items: this.cart,
                         metodo_pago: this.paymentMethod,
                         monto_recibido: this.paymentMethod === 'efectivo' ? parseFloat(this.receivedAmount) : this.total,
+                        num_referencia: this.referenceNumber.trim(),
                         total: this.total
                     })
                 });
@@ -199,19 +219,34 @@ document.addEventListener('alpine:init', () => {
                 const data = await response.json();
 
                 if (response.ok && data.success) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: '¡Venta Realizada!',
-                        html: `Total: <b>$${this.formatNumber(data.total || this.total)}</b><br>` + 
-                              (this.paymentMethod === 'efectivo' ? `Cambio: <b>$${this.formatNumber(data.cambio || this.change)}</b>` : ''),
-                        confirmButtonColor: '#4f46e5'
-                    });
-
-                    // Descontar stock localmente para actualizar la vista sin necesidad de recargar
-                    // CORRECCIÓN AQUÍ TAMBIÉN: Usar == para que encuentre correctamente el producto y actualice la vista
+                    // Descontar stock localmente
                     this.cart.forEach(item => {
                         const product = this.products.find(p => p.id == item.id);
                         if (product) product.stock -= item.quantity;
+                    });
+
+                    this.lastTicket = data.ticket;
+                    this.showTicket = true;
+
+                    // === NOTIFICACIÓN DE VENTA REALIZADA ===
+                    const recibido = this.paymentMethod === 'efectivo' ? parseFloat(this.receivedAmount) : this.total;
+                    const cambio = this.paymentMethod === 'efectivo' ? Math.max(0, recibido - this.total) : 0;
+
+                    let htmlMensaje = `<strong>Total: $${this.formatNumber(this.total)}</strong>`;
+                    if (this.paymentMethod === 'efectivo') {
+                        htmlMensaje += `<br>Recibido: $${this.formatNumber(recibido)}`;
+                        htmlMensaje += `<br>Cambio: $${this.formatNumber(cambio)}`;
+                    }
+
+                    Swal.fire({
+                        icon: 'success',
+                        title: '¡Venta realizada!',
+                        html: htmlMensaje,
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 4000,
+                        timerProgressBar: true
                     });
 
                     this.clearCart();

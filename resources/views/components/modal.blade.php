@@ -2,7 +2,6 @@
     'name', 
     'title', 
     'maxWidth' => 'max-w-md',
-    'dotColor' => 'bg-indigo-500 shadow-[0_0_10px_rgba(99,102,241,0.8)]'
 ])
 
 <div x-show="modals.{{ $name }}" 
@@ -15,22 +14,19 @@
      x-transition:leave-start="opacity-100 scale-100"
      x-transition:leave-end="opacity-0 scale-95">
 
-    <div class="relative w-full {{ $maxWidth }} max-h-[90vh] bg-white dark:bg-[#090d18] text-slate-900 dark:text-slate-100 rounded-[28px] border border-slate-200/80 dark:border-slate-800/60 shadow-2xl flex flex-col overflow-hidden my-auto" 
+    <div class="relative w-full {{ $maxWidth }} max-h-[90vh] bg-white dark:bg-[#090d18] text-slate-900 dark:text-slate-100 rounded-[28px] border border-slate-200/80 dark:border-[#FF6B4A]/20 shadow-2xl flex flex-col overflow-hidden my-auto" 
          @click.outside="closeModal('{{ $name }}')">
         
-        {{-- Resplandor Neón Sutil --}}
-        <div class="hidden dark:block pointer-events-none absolute -top-20 -left-20 w-72 h-72 bg-indigo-600/15 rounded-full blur-3xl"></div>
-
         {{-- Header --}}
-        <div class="relative z-10 flex items-center justify-between p-5 sm:px-7 border-b border-slate-100 dark:border-white/5 bg-transparent shrink-0">
+        <div class="relative z-10 flex items-center justify-between p-5 sm:px-7 border-b border-slate-100 dark:border-[#FF6B4A]/10 bg-transparent shrink-0">
             <div class="flex items-center gap-3">
-                <span class="w-2.5 h-2.5 rounded-full {{ $dotColor }}"></span>
+                <span class="w-2.5 h-2.5 rounded-full bg-[#FF6B4A] shadow-[0_0_10px_rgba(255,107,74,0.8)]"></span>
                 <h3 class="text-xs sm:text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">
                     {{ $title }}
                 </h3>
             </div>
             <button type="button" @click="closeModal('{{ $name }}')" 
-                    class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white flex items-center justify-center font-bold transition-all cursor-pointer border border-slate-200/80 dark:border-slate-800/80">
+                    class="w-8 h-8 rounded-full bg-[#FF6B4A]/10 dark:bg-[#FF6B4A]/15 hover:bg-[#F0552F] dark:hover:bg-[#F0552F] text-[#F0552F] dark:text-[#FF8A65] hover:text-white dark:hover:text-white flex items-center justify-center font-bold transition-all duration-200 hover:rotate-90 hover:shadow-md hover:shadow-[#F0552F]/30 cursor-pointer border border-[#FF6B4A]/30 dark:border-[#FF6B4A]/25">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
         </div>

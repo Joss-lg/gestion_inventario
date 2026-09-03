@@ -20,6 +20,13 @@ class CajaMovimiento extends Model
         'fecha_cierre',
         'estado',
         'observaciones',
+        'metodo_pago',
+        'num_referencia',
+        'monto_esperado',              // <-- Agregado
+        'total_ventas_efectivo',       // <-- Agregado
+        'total_ventas_tarjeta',        // <-- Agregado
+        'total_ventas_transferencia',  // <-- Agregado
+        'total_gastos',                // <-- Agregado
     ];
 
     // Convertimos los tipos de datos automáticamente al consultar el modelo
@@ -28,6 +35,11 @@ class CajaMovimiento extends Model
         'monto_cierre' => 'decimal:2',
         'fecha_apertura' => 'datetime',
         'fecha_cierre' => 'datetime',
+        'monto_esperado' => 'decimal:2',
+        'total_ventas_efectivo' => 'decimal:2',
+        'total_ventas_tarjeta' => 'decimal:2',
+        'total_ventas_transferencia' => 'decimal:2',
+        'total_gastos' => 'decimal:2',
     ];
 
     public function user(): BelongsTo

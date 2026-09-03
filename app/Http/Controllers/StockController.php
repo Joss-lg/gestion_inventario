@@ -16,7 +16,7 @@ class StockController extends Controller
         $products = Product::all();
 
         // Construimos la consulta base
-        $query = InventoryMovement::with(['product', 'user'])->latest();
+        $query = InventoryMovement::with(['product', 'user'])->orderByDesc('id');
 
         // Si el usuario no es admin (o no tiene permiso 'manage-users'), solo ve sus movimientos
         if (Gate::denies('manage-users')) {
@@ -59,13 +59,26 @@ class StockController extends Controller
 
         $user = auth()->user();
 
+        // Buscamos si el usuario tiene una caja abierta actualmente
+        $cajaActiva = \App\Models\CajaMovimiento::where('user_id', $user->id)
+            ->where('estado', 'abierta')
+            ->first();
+
+        // 3. Si es una SALIDA, exigimos caja abierta: toda salida de stock
+        //    debe reflejarse en el control de caja.
+        if ($request->type === 'salida' && ! $cajaActiva) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Debes abrir tu caja antes de registrar una salida de stock.');
+        }
+
         try {
-            DB::transaction(function () use ($request, $user) {
-                // 3. Obtenemos el producto con bloqueo para evitar inconsistencias
+            DB::transaction(function () use ($request, $user, $cajaActiva) {
+                // 4. Obtenemos el producto con bloqueo para evitar inconsistencias
                 $product = Product::lockForUpdate()->findOrFail($request->product_id);
                 $cantidad = (int) $request->quantity;
 
-                // 4. Actualizamos el stock y validamos existencias disponibles
+                // 5. Actualizamos el stock y validamos existencias disponibles
                 if ($request->type === 'salida') {
                     if ($product->stock < $cantidad) {
                         throw new \Exception("Stock insuficiente. Stock actual disponible: {$product->stock} pzas.");
@@ -76,16 +89,27 @@ class StockController extends Controller
                 }
                 $product->save();
 
-                // 5. Guardamos el movimiento de inventario puro
+                // 6. Si es salida, se descuenta también en el control de caja
+                //    (se contará como "gasto" en calcularTotalesTurno, igual
+                //    que storeGasto, ya que el reason no inicia con "Venta directa").
+                $cajaId = null;
+                $total = 0;
+
+                if ($request->type === 'salida') {
+                    $cajaId = $cajaActiva->id;
+                    $total = $product->price * $cantidad;
+                }
+
+                // 7. Guardamos el movimiento de inventario
                 InventoryMovement::create([
                     'product_id' => $product->id,
                     'user_id' => $user->id,
-                    'caja_id' => null, // Los movimientos manuales de inventario no afectan la caja activa
+                    'caja_id' => $cajaId,
                     'type' => $request->type,
                     'quantity' => $cantidad,
                     'reason' => $request->reason,
                     'unit_price' => $product->price, // Se guarda como referencia
-                    'total' => 0, // No genera monto económico en caja
+                    'total' => $total,
                     'notes' => $request->notes ?? null,
                     'date' => now(),
                 ]);

@@ -22,8 +22,16 @@ class CheckPermission
         }
 
         // Operadores u otros roles evalúan sus permisos asignados
-        if ($user->hasPermissionTo($permission)) {
-            return $next($request);
+        // Permisos pueden venir como lista separada por '|' (OR lógico)
+        $permissions = explode('|', $permission);
+        foreach ($permissions as $perm) {
+            $perm = trim($perm);
+            if ($perm === '') {
+                continue;
+            }
+            if ($user->hasPermissionTo($perm)) {
+                return $next($request);
+            }
         }
 
         return redirect()->route('dashboard')->with('error', 'No cuentas con los permisos requeridos para acceder.');

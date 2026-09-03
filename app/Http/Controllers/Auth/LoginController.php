@@ -36,7 +36,7 @@ class LoginController extends Controller
 
         $remember = $request->has('remember');
 
-        if (Auth::attempt($credentials, $remember)) {
+        if (Auth::attempt(array_merge($credentials, ['is_active' => true]), $remember)) {
             $request->session()->regenerate();
 
             return redirect()->intended(route('dashboard'));

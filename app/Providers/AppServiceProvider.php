@@ -25,8 +25,7 @@ class AppServiceProvider extends ServiceProvider
         // 1. SUPER ADMINISTRADOR (Acceso total automático sin restricciones)
         // =========================================================================
         Gate::before(function (User $user) {
-            // Si es el ID 1 o tiene un método que valide que es Admin, salta todas las reglas
-            if ($user->id === 1 || $user->isAdmin()) {
+            if ($user->isAdmin()) {
                 return true;
             }
         });
@@ -39,22 +38,22 @@ class AppServiceProvider extends ServiceProvider
         });
 
         // =========================================================================
-        // 3. GATES OPERATIVOS (Exigen de forma obligatoria que la CAJA ESTÉ ABIERTA)
+        // 3. GATES OPERATIVOS (La caja solo se exige para ventas y gastos)
         // =========================================================================
 
         // Permiso para Categorías
         Gate::define('manage-categories', function (User $user) {
-            return $user->hasPermission('manage-categories') && $user->cajaActiva() !== null;
+            return $user->hasPermission('manage-categories');
         });
 
         // Permiso para Productos
         Gate::define('manage-products', function (User $user) {
-            return $user->hasPermission('manage-products') && $user->cajaActiva() !== null;
+            return $user->hasPermission('manage-products');
         });
 
         // Permiso para Movimientos de Inventario / Stock
         Gate::define('register-movements', function (User $user) {
-            return $user->hasPermission('register-movements') && $user->cajaActiva() !== null;
+            return $user->hasPermission('register-movements');
         });
     }
 }

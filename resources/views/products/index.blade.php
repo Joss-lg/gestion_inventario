@@ -14,7 +14,7 @@
             <p class="page-subtitle">Catálogo completo de productos e inventario global en tiempo real.</p>
         </div>
         
-        <button @click="openCreateModal()" class="btn-primary w-full sm:w-auto uppercase tracking-wider cursor-pointer">
+        <button @click="openCreateModal()" class="bg-[#FF4500] hover:bg-[#E63E00] text-white font-bold rounded-2xl px-5 py-2.5 shadow-md shadow-[#FF4500]/25 active:scale-95 transition w-full sm:w-auto uppercase tracking-wider text-xs cursor-pointer inline-flex items-center justify-center gap-2">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
             <span>Registrar Producto</span>
         </button>
@@ -22,7 +22,7 @@
 
     {{-- TABLA / TARJETAS --}}
     <div class="table-container">
-        <div class="px-6 py-5 bg-slate-100/60 dark:bg-[#070a11]/80 border-b border-slate-200/80 dark:border-slate-800/80">
+        <div class="px-6 py-5 bg-slate-50 dark:bg-slate-900/40 border-b border-slate-200/80 dark:border-slate-800/80">
             <h2 class="text-xs sm:text-sm font-black text-slate-800 dark:text-white uppercase tracking-wider">Existencias Activas</h2>
             <p class="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 font-bold mt-0.5">Listado maestro en tiempo real</p>
         </div>
@@ -30,7 +30,7 @@
         {{-- VISTA MÓVIL --}}
         <div class="block md:hidden divide-y divide-slate-100 dark:divide-slate-800/60">
             @forelse($products as $product)
-            <div class="p-4 space-y-3 hover:bg-indigo-50/40 dark:hover:bg-indigo-500/5 transition-colors">
+            <div class="p-4 space-y-3 hover:bg-[#FFF1EC]/40 dark:hover:bg-[#FF6B4A]/5 transition-colors">
                 <div class="flex items-center justify-between">
                     <span class="text-xs font-bold text-slate-400 dark:text-slate-500 tabular-nums">#{{ $product->id }}</span>
                     <span class="font-black px-3 py-1 bg-slate-100 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-800 rounded-xl text-[10px] tracking-wide text-slate-800 dark:text-slate-200">
@@ -58,7 +58,7 @@
                     <div>
                         <div class="text-[10px] uppercase tracking-wider font-extrabold text-slate-400 dark:text-slate-500">Precio & Stock</div>
                         <div class="flex items-center gap-2 mt-0.5">
-                            <span class="font-black text-indigo-600 dark:text-indigo-400 text-sm">${{ number_format($product->price, 2) }}</span>
+                            <span class="font-black text-[#F0552F] dark:text-[#FF8A65] text-sm">${{ number_format($product->price, 2) }}</span>
                             <span class="text-slate-300 dark:text-slate-700">•</span>
                             <span class="font-bold text-slate-700 dark:text-slate-300 text-xs">{{ $product->stock }} u.</span>
                         </div>
@@ -66,11 +66,12 @@
 
                     <div class="flex items-center gap-2">
                         <button @click="openEditModal({{ $product->id }}, '{{ addslashes($product->name) }}', '{{ $product->category_id ?? '' }}', {{ $product->price }}, {{ $product->stock }}, '{{ $product->sku ?? '' }}')" 
-                                class="p-2 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-500/10 border border-transparent hover:border-indigo-500/20 rounded-xl transition-all cursor-pointer inline-flex items-center">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                                class="w-9 h-9 rounded-xl bg-[#FF6B4A]/10 hover:bg-[#FF6B4A]/20 border border-[#FF6B4A]/20 text-[#F0552F] dark:text-[#FF8A65] flex items-center justify-center transition-all cursor-pointer shadow-xs">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 4H6a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                         </button>
-                        <button @click="openDeleteModal({{ $product->id }})" class="p-2 text-rose-500 hover:bg-rose-500/10 rounded-xl transition-all cursor-pointer">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-16v1a3 3 0 003 3h10M9 3h6M4 7h16"/></svg>
+                        <button @click="openDeleteModal({{ $product->id }})" 
+                                class="w-9 h-9 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 text-rose-500 flex items-center justify-center transition-all cursor-pointer shadow-xs">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3.75h6a.75.75 0 01.75.75v.75h3.75a.75.75 0 010 1.5h-.588l-.83 12.451A2.25 2.25 0 0115.887 21H8.113a2.25 2.25 0 01-2.245-2.049L5.038 6.75H4.5a.75.75 0 010-1.5h3.75V4.5A.75.75 0 019 3.75zM9.75 9.75a.75.75 0 00-1.5 0v7.5a.75.75 0 001.5 0v-7.5zm3-.75a.75.75 0 01.75.75v7.5a.75.75 0 01-1.5 0v-7.5a.75.75 0 01.75-.75zm3.75.75a.75.75 0 00-1.5 0v7.5a.75.75 0 001.5 0v-7.5z"/></svg>
                         </button>
                     </div>
                 </div>
@@ -113,16 +114,19 @@
                                 {{ $product->category->name ?? 'Sin Categoría' }}
                             </span>
                         </td>
-                        <td class="table-td font-black text-indigo-600 dark:text-indigo-400 tabular-nums">${{ number_format($product->price, 2) }}</td>
+                        <td class="table-td font-black text-[#F0552F] dark:text-[#FF8A65] tabular-nums">${{ number_format($product->price, 2) }}</td>
                         <td class="table-td font-bold text-slate-700 dark:text-slate-400 tabular-nums">{{ $product->stock }} u.</td>
-                        <td class="table-td text-right space-x-2 whitespace-nowrap">
-                            <button @click="openEditModal({{ $product->id }}, '{{ addslashes($product->name) }}', '{{ $product->category_id ?? '' }}', {{ $product->price }}, {{ $product->stock }}, '{{ $product->sku ?? '' }}')" 
-                                    class="p-2 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-500/10 border border-transparent hover:border-indigo-500/20 rounded-xl transition-all cursor-pointer inline-flex items-center">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
-                            </button>
-                            <button @click="openDeleteModal({{ $product->id }})" class="p-2 text-rose-500 hover:bg-rose-500/10 rounded-xl transition-all cursor-pointer">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-16v1a3 3 0 003 3h10M9 3h6M4 7h16"/></svg>
-                            </button>
+                        <td class="table-td text-right whitespace-nowrap">
+                            <div class="inline-flex items-center gap-2">
+                                <button @click="openEditModal({{ $product->id }}, '{{ addslashes($product->name) }}', '{{ $product->category_id ?? '' }}', {{ $product->price }}, {{ $product->stock }}, '{{ $product->sku ?? '' }}')" 
+                                        class="w-9 h-9 rounded-xl bg-[#FF6B4A]/10 hover:bg-[#FF6B4A]/20 border border-[#FF6B4A]/20 text-[#F0552F] dark:text-[#FF8A65] inline-flex items-center justify-center transition-all cursor-pointer shadow-xs" title="Editar producto">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 4H6a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                </button>
+                                <button @click="openDeleteModal({{ $product->id }})" 
+                                        class="w-9 h-9 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 text-rose-500 inline-flex items-center justify-center transition-all cursor-pointer shadow-xs" title="Eliminar producto">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3.75h6a.75.75 0 01.75.75v.75h3.75a.75.75 0 010 1.5h-.588l-.83 12.451A2.25 2.25 0 0115.887 21H8.113a2.25 2.25 0 01-2.245-2.049L5.038 6.75H4.5a.75.75 0 010-1.5h3.75V4.5A.75.75 0 019 3.75zM9.75 9.75a.75.75 0 00-1.5 0v7.5a.75.75 0 001.5 0v-7.5zm3-.75a.75.75 0 01.75.75v7.5a.75.75 0 01-1.5 0v-7.5a.75.75 0 01.75-.75zm3.75.75a.75.75 0 00-1.5 0v7.5a.75.75 0 001.5 0v-7.5z"/></svg>
+                                </button>
+                            </div>
                         </td>
                     </tr>
                     @empty
@@ -174,11 +178,11 @@
 
                 <div class="space-y-1.5">
                     <label class="form-label">Imagen (Opcional)</label>
-                    <div onclick="document.getElementById('file-upload').click()" class="border-2 border-dashed border-slate-200 dark:border-slate-800 hover:border-indigo-500 bg-slate-50 dark:bg-slate-900/50 rounded-2xl w-28 h-28 flex flex-col items-center justify-center cursor-pointer relative overflow-hidden transition-all">
+                    <div onclick="document.getElementById('file-upload').click()" class="border-2 border-dashed border-slate-200 dark:border-slate-800 hover:border-[#FF6B4A] bg-slate-50 dark:bg-slate-900/50 rounded-2xl w-28 h-28 flex flex-col items-center justify-center cursor-pointer relative overflow-hidden transition-all">
                         <img id="image-preview" class="absolute inset-0 w-full h-full object-cover hidden z-10">
                         <div id="upload-prompt" class="text-center p-2">
-                            <svg class="mx-auto h-6 w-6 text-indigo-500 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                            <p class="text-[9px] font-black uppercase text-indigo-600 dark:text-indigo-400">Subir Img</p>
+                            <svg class="mx-auto h-6 w-6 text-[#FF6B4A] mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                            <p class="text-[9px] font-black uppercase text-[#F0552F] dark:text-[#FF8A65]">Subir Img</p>
                         </div>
                         <input id="file-upload" type="file" name="image" accept="image/*" class="hidden" @change="previewFile('create')">
                     </div>
@@ -187,7 +191,7 @@
 
             <div class="flex items-center justify-end gap-3 p-5 sm:px-7 border-t border-slate-100 dark:border-white/5 bg-transparent shrink-0">
                 <button type="button" @click="closeModal('create')" class="btn-secondary">Cancelar</button>
-                <button type="submit" class="btn-primary">Guardar Producto</button>
+                <button type="submit" class="bg-[#FF4500] hover:bg-[#E63E00] text-white font-bold rounded-2xl px-5 py-2.5 shadow-md shadow-[#FF4500]/25 active:scale-95 transition text-xs cursor-pointer">Guardar Producto</button>
             </div>
         </form>
     </x-modal>
@@ -231,11 +235,11 @@
 
                 <div class="space-y-1.5">
                     <label class="form-label">Reemplazar Imagen (Opcional)</label>
-                    <div onclick="document.getElementById('file-upload-edit').click()" class="border-2 border-dashed border-slate-200 dark:border-slate-800 hover:border-indigo-500 bg-slate-50 dark:bg-slate-900/50 rounded-2xl w-28 h-28 flex flex-col items-center justify-center cursor-pointer relative overflow-hidden transition-all">
+                    <div onclick="document.getElementById('file-upload-edit').click()" class="border-2 border-dashed border-slate-200 dark:border-slate-800 hover:border-[#FF6B4A] bg-slate-50 dark:bg-slate-900/50 rounded-2xl w-28 h-28 flex flex-col items-center justify-center cursor-pointer relative overflow-hidden transition-all">
                         <img id="image-preview-edit" class="absolute inset-0 w-full h-full object-cover hidden z-10">
                         <div id="upload-prompt-edit" class="text-center p-2">
-                            <svg class="mx-auto h-6 w-6 text-indigo-500 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                            <p class="text-[9px] font-black uppercase text-indigo-600 dark:text-indigo-400">Nueva Img</p>
+                            <svg class="mx-auto h-6 w-6 text-[#FF6B4A] mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                            <p class="text-[9px] font-black uppercase text-[#F0552F] dark:text-[#FF8A65]">Nueva Img</p>
                         </div>
                         <input id="file-upload-edit" type="file" name="image" accept="image/*" class="hidden" @change="previewFile('edit')">
                     </div>
@@ -244,7 +248,7 @@
 
             <div class="flex items-center justify-end gap-3 p-5 sm:px-7 border-t border-slate-100 dark:border-white/5 bg-transparent shrink-0">
                 <button type="button" @click="closeModal('edit')" class="btn-secondary">Cancelar</button>
-                <button type="submit" class="btn-primary">Actualizar Producto</button>
+                <button type="submit" class="bg-[#FF4500] hover:bg-[#E63E00] text-white font-bold rounded-2xl px-5 py-2.5 shadow-md shadow-[#FF4500]/25 active:scale-95 transition text-xs cursor-pointer">Actualizar Producto</button>
             </div>
         </form>
     </x-modal>
@@ -258,12 +262,12 @@
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
             </div>
             <p class="text-[11px] text-slate-500 dark:text-slate-400 mb-6 font-semibold px-2 leading-relaxed">
-                Esta acción eliminará de forma irreversible el producto de las existencias operativas del servidor.
+               ¿Estás seguro de eliminar este producto? Se borrará de forma definitiva de tu inventario.
             </p>
             <form :action="'{{ route('products.index') }}/' + formDelete.id" method="POST" class="flex gap-3">
                 @csrf
                 @method('DELETE')
-                <button type="button" @click="closeModal('delete')" class="btn-secondary w-1/2 justify-center">Abortar</button>
+                <button type="button" @click="closeModal('delete')" class="btn-secondary w-1/2 justify-center">Cancelar</button>
                 <button type="submit" class="w-1/2 py-2.5 rounded-2xl bg-rose-600 hover:bg-rose-700 text-white font-black text-xs transition-all shadow-md active:scale-95 cursor-pointer">Eliminar</button>
             </form>
         </div>

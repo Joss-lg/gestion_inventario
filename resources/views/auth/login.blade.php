@@ -11,7 +11,7 @@
     <div class="max-w-md w-full bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-100 p-8 sm:p-10">
         
         <div class="text-center mb-8">
-            <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-indigo-600 text-white font-extrabold text-2xl tracking-widest shadow-lg shadow-indigo-600/30 mb-4">
+            <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-[#FF6B4A] text-white font-extrabold text-2xl tracking-widest shadow-lg shadow-[#FF6B4A]/30 mb-4">
                 S
             </div>
             <h2 class="text-2xl font-bold tracking-tight text-slate-800">SCGI Negocios</h2>
@@ -39,7 +39,7 @@
                     </span>
                     <input id="email" type="email" name="email" value="{{ old('email') }}" required autofocus autocomplete="username"
                            placeholder="nombre@empresa.com"
-                           class="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-hidden focus:border-indigo-600 focus:bg-white transition-all shadow-inner-xs">
+                           class="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-hidden focus:border-[#FF6B4A] focus:bg-white transition-all shadow-inner-xs">
                 </div>
             </div>
 
@@ -47,7 +47,7 @@
                 <div class="flex items-center justify-between mb-1.5">
                     <label for="password" class="block text-xs font-bold uppercase tracking-wider text-slate-600">Contraseña</label>
                     @if (Route::has('password.request'))
-                        <a href="{{ route('password.request') }}" class="text-xs font-semibold text-indigo-600 hover:text-indigo-800 transition-colors">¿Olvidaste tu contraseña?</a>
+                        <a href="{{ route('password.request') }}" class="text-xs font-semibold text-[#FF6B4A] hover:text-[#C94A2E] transition-colors">¿Olvidaste tu contraseña?</a>
                     @endif
                 </div>
                 <div class="relative">
@@ -57,7 +57,7 @@
                     
                     <input id="password" type="password" name="password" required autocomplete="current-password"
                            placeholder="••••••••"
-                           class="w-full pl-11 pr-12 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-hidden focus:border-indigo-600 focus:bg-white transition-all shadow-inner-xs">
+                           class="w-full pl-11 pr-12 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-hidden focus:border-[#FF6B4A] focus:bg-white transition-all shadow-inner-xs">
                     
                     <button type="button" onclick="togglePasswordVisibility()" class="absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer focus:outline-hidden" title="Mostrar/Ocultar contraseña">
                         <svg id="eye-icon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -73,12 +73,12 @@
 
             <div class="flex items-center justify-between pt-1">
                 <label for="remember_me" class="flex items-center gap-2 cursor-pointer select-none">
-                    <input id="remember_me" type="checkbox" name="remember" class="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer">
+                    <input id="remember_me" type="checkbox" name="remember" class="w-4 h-4 rounded border-slate-300 text-[#FF6B4A] focus:ring-[#FF6B4A]/50 cursor-pointer">
                     <span class="text-xs font-medium text-slate-600">Recordar sesión</span>
                 </label>
             </div>
 
-            <button type="submit" class="w-full mt-2 py-3.5 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-lg shadow-indigo-600/30 transition-all cursor-pointer text-sm">
+            <button type="submit" class="w-full mt-2 py-3.5 px-4 bg-[#FF6B4A] hover:bg-[#FF4500] text-white font-bold rounded-xl shadow-lg shadow-[#FF6B4A]/30 transition-all cursor-pointer text-sm">
                 Iniciar Sesión
             </button>
         </form>

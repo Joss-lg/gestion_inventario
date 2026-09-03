@@ -29,8 +29,8 @@ document.addEventListener("DOMContentLoaded", function () {
             datasets: [{
                 label: 'Unidades Vendidas',
                 data: values.length > 0 ? values : [0],
-                backgroundColor: 'rgba(79, 70, 229, 0.8)',
-                borderColor: 'rgba(79, 70, 229, 1)',
+                backgroundColor: 'rgba(255, 107, 74, 0.8)',
+                borderColor: 'rgba(255, 69, 0, 1)',
                 borderWidth: 2,
                 borderRadius: 8,
             }]

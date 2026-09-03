@@ -1,74 +1,112 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. Configuración global de alertas flotantes SweetAlert2 (Toasts)
+    const isDarkMode = () => document.documentElement.classList.contains('dark');
+
+    // 1. Configuración global de Toasts para notificaciones de sesión
     window.notify = (icon, title) => {
+        if (typeof Swal === 'undefined') return;
         const Toast = Swal.mixin({
             toast: true,
             position: 'top-end',
             showConfirmButton: false,
-            timer: 2500,
+            timer: 4000,
             timerProgressBar: true,
-            background: '#1a1a1a',
-            color: '#fff'
+            background: isDarkMode() ? '#0f172a' : '#ffffff',
+            color: isDarkMode() ? '#f8fafc' : '#0f172a',
         });
         Toast.fire({ icon, title });
     };
 
-    // Dispara automáticamente Toasts si Laravel envía variables de sesión flash
-    if (window.sessionSuccess) {
-        window.notify('success', window.sessionSuccess);
-    }
-    if (window.sessionError) {
-        window.notify('error', window.sessionError);
-    }
+    if (window.sessionSuccess) window.notify('success', window.sessionSuccess);
+    if (window.sessionError) window.notify('error', window.sessionError);
 });
 
 // 2. Componente Alpine.js para la Gestión de Usuarios
 document.addEventListener('alpine:init', () => {
     Alpine.data('userManagement', () => ({
-        // Sincronizado con <x-modal name="user">
-        modals: {
-            user: false
-        },
+        modals: { user: false, role: false, delete: false },
         isEditMode: false,
-        
-        // Estado inicial de datos del modal (rol 2 asignado por defecto a nuevos)
-        currentUser: { 
-            id: null, 
-            name: '', 
-            email: '', 
-            role_id: 2, 
-            is_active: true 
-        },
+        currentUser: { id: null, name: '', email: '', role_id: 2, is_active: true },
         currentUserPerms: [],
-        
-        // Cadenas limpias para filtros
-        searchQuery: '',
-        selectedRoleFilter: '',
+        roleForm: { name: '', description: '', is_active: true },
+        rolePerms: [],
 
-        // Contador reactivo de permisos seleccionados
-        get selectedPermsCount() {
-            return Array.isArray(this.currentUserPerms) ? this.currentUserPerms.length : 0;
+        // Objeto único para manejar la eliminación (sirve para usuario Y rol)
+        formDelete: { id: null, name: '', type: 'user' },
+
+        get selectedPermsCount() { 
+            return Array.isArray(this.currentUserPerms) ? this.currentUserPerms.length : 0; 
+        },
+        get selectedRolePermsCount() { 
+            return Array.isArray(this.rolePerms) ? this.rolePerms.length : 0; 
         },
 
-        // Modal para CREAR usuario
+        // --- LÓGICA DE VISIBILIDAD Y TABLA DE PERMISOS POR MÓDULO ---
+
+        /**
+         * Verifica si un permiso específico está activo en el usuario actual.
+         * Se asegura de comparar los elementos convirtiéndolos a números de forma limpia.
+         */
+        hasPermission(permId) {
+            if (!permId || permId === 0) return false;
+            const targetId = Number(permId);
+            return this.currentUserPerms.some(id => Number(id) === targetId);
+        },
+
+        /**
+         * Controla el toggle del permiso 'Ver' (Visibilidad).
+         * Si se desmarca 'Ver', limpia automáticamente los permisos hijos asociados (Crear, Editar, Borrar).
+         */
+        handleViewToggle(viewPermId, childPermIds = []) {
+            if (!viewPermId) return;
+            
+            this.$nextTick(() => {
+                const isViewActive = this.hasPermission(viewPermId);
+                
+                if (!isViewActive) {
+                    const childIdsClean = (Array.isArray(childPermIds) ? childPermIds : [])
+                        .filter(id => id !== null && id !== undefined)
+                        .map(id => Number(id));
+
+                    this.currentUserPerms = this.currentUserPerms.filter(
+                        id => !childIdsClean.includes(Number(id))
+                    );
+                }
+            });
+        },
+
+        // --- APERTURA Y CONTROL DE MODALES ---
+
+        openDeleteModal(user) {
+            if (!user) return;
+
+            if (user.id === 1 || parseInt(user.id, 10) === 1) {
+                if (window.notify) {
+                    window.notify('error', 'El Super Administrador principal no puede ser eliminado.');
+                } else {
+                    alert('El Super Administrador principal no puede ser eliminado.');
+                }
+                return;
+            }
+
+            this.formDelete = { id: user.id, name: user.name || '', type: 'user' };
+            this.modals.delete = true;
+        },
+
+        openDeleteRoleModal(roleId, roleName) {
+            this.formDelete = { id: roleId, name: roleName || '', type: 'role' };
+            this.modals.delete = true;
+        },
+
         openCreateModal() {
             this.isEditMode = false;
-            this.currentUser = { 
-                id: null, 
-                name: '', 
-                email: '', 
-                role_id: 2, 
-                is_active: true 
-            };
+            this.currentUser = { id: null, name: '', email: '', role_id: 2, is_active: true };
             this.currentUserPerms = [];
             this.modals.user = true;
         },
 
-        // Modal para EDITAR usuario
         setUserData(user, userPermsIds) {
             if (!user) return;
             this.isEditMode = true;
-            
             this.currentUser = {
                 id: user.id ? parseInt(user.id, 10) : null,
                 name: user.name || '',
@@ -76,51 +114,18 @@ document.addEventListener('alpine:init', () => {
                 role_id: user.role_id ? parseInt(user.role_id, 10) : 2,
                 is_active: user.is_active === undefined ? true : Boolean(Number(user.is_active))
             };
-            
-            // Forzamos arreglos de números enteros para los checkboxes
-            this.currentUserPerms = Array.isArray(userPermsIds) 
-                ? userPermsIds.map(id => parseInt(id, 10)) 
-                : [];
-            
+            this.currentUserPerms = Array.isArray(userPermsIds) ? userPermsIds.map(id => parseInt(id, 10)) : [];
             this.modals.user = true;
         },
 
-        // Método genérico para cerrar modales compatible con <x-modal>
-        closeModal(name) {
-            if (this.modals[name] !== undefined) {
-                this.modals[name] = false;
-            }
+        openCreateRoleModal() {
+            this.roleForm = { name: '', description: '', is_active: true };
+            this.rolePerms = [];
+            this.modals.role = true;
         },
 
-        // Confirmación para eliminar usuario con SweetAlert2
-        confirmDelete(event, userId) {
-            // Protección reactiva defensiva: Previene intentar eliminar al Super Admin ID 1
-            if (userId === 1) {
-                window.notify('error', 'El Super Administrador principal no puede ser eliminado.');
-                return;
-            }
-
-            const form = event.target;
-            
-            Swal.fire({
-                title: '¿Estás seguro?',
-                text: '¿Realmente deseas eliminar este usuario? Esta acción no se puede deshacer.',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#4f46e5', // Indigo 600
-                cancelButtonColor: '#f43f5e',  // Rose 500
-                confirmButtonText: 'Sí, eliminar',
-                cancelButtonText: 'Cancelar',
-                background: '#1a1a1a',
-                color: '#ffffff',
-                customClass: {
-                    popup: 'rounded-2xl border border-slate-800 shadow-xl'
-                }
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    form.submit();
-                }
-            });
+        closeModal(name) {
+            if (this.modals[name] !== undefined) this.modals[name] = false;
         }
     }));
 });

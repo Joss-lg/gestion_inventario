@@ -9,9 +9,29 @@
 @theme {
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
+
+    /* Paleta Coral Corporativa SCGI */
+    --color-coral-50: #fff5f2;
+    --color-coral-100: #ffe6e1;
+    --color-coral-200: #ffd0c7;
+    --color-coral-300: #ffaa9b;
+    --color-coral-400: #ff7860;
+    --color-coral-500: #ff5031;
+    --color-coral-600: #f03211;
+    --color-coral-700: #c92308;
+    --color-coral-800: #a5210d;
+    --color-coral-900: #882112;
+    --color-coral-950: #4a0c04;
 }
 
 @variant dark (&:where(.dark, .dark *));
+
+/* Configuración Base de Fondos y Textos */
+@layer base {
+    body {
+        @apply bg-slate-50 dark:bg-[#070a11] text-slate-800 dark:text-slate-100 antialiased selection:bg-coral-500 selection:text-white;
+    }
+}
 
 /* Previene el parpadeo visual en elementos con Alpine.js antes de inicializarse */
 [x-cloak] { 
@@ -22,17 +42,29 @@
    ELIMINACIÓN TOTAL DE BARRAS DE SCROLL EN CUALQUIER ELEMENTO (*)
    ========================================================================== */
 
-/* Firefox, IE y Edge para todos los elementos */
 * {
     -ms-overflow-style: none !important;
     scrollbar-width: none !important;
 }
 
-/* Webkit (Chrome, Safari, Brave, Edge) para todos los elementos */
 *::-webkit-scrollbar {
     display: none !important;
     width: 0 !important;
     height: 0 !important;
+}
+
+/* ==========================================================================
+   UTILIDADES DE INPUT (POS, Historial de Caja, etc.)
+   ========================================================================== */
+
+/* Oculta las flechas nativas de los inputs numéricos */
+.no-spinner::-webkit-outer-spin-button,
+.no-spinner::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+.no-spinner[type=number] {
+    -moz-appearance: textfield;
 }
 
 @utility backdrop-blur-md {
@@ -41,7 +73,7 @@
 }
 
 /* ==========================================================================
-   DESIGN SYSTEM SCGI - NUEVO LOOK PREMIUM (TAILWIND V4)
+   DESIGN SYSTEM SCGI - LOOK PREMIUM (TAILWIND V4)
    ========================================================================== */
 
 /* 1. CONTENEDORES Y TARJETAS */
@@ -50,12 +82,12 @@
 }
 
 @utility kpi-card {
-    @apply relative overflow-hidden bg-gradient-to-br from-white to-slate-50/50 dark:from-[#0d1322] dark:to-[#070a11] border border-slate-200/90 dark:border-slate-800/80 p-6 rounded-3xl shadow-xl shadow-indigo-500/5 transition-all duration-300 hover:-translate-y-1 hover:border-indigo-500/30;
+    @apply relative overflow-hidden bg-gradient-to-br from-white to-slate-50/50 dark:from-[#0d1322] dark:to-[#070a11] border border-slate-200/90 dark:border-slate-800/80 p-6 rounded-3xl shadow-xl shadow-coral-500/5 transition-all duration-300 hover:-translate-y-1 hover:border-coral-500/30;
 }
 
 /* 2. ENCABEZADOS Y TEXTOS */
 @utility page-title {
-    @apply text-3xl font-black text-slate-900 dark:text-white tracking-tight bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-800 dark:from-white dark:via-slate-200 dark:to-indigo-300 bg-clip-text text-transparent;
+    @apply text-3xl font-black text-slate-900 dark:text-white tracking-tight bg-gradient-to-r from-slate-900 via-coral-950 to-slate-800 dark:from-white dark:via-slate-200 dark:to-coral-300 bg-clip-text text-transparent;
 }
 
 @utility page-subtitle {
@@ -72,7 +104,7 @@
 
 /* 3. INPUTS Y SELECTS */
 @utility form-input {
-    @apply w-full px-4 py-3 bg-slate-100/70 dark:bg-[#070a11] border border-slate-200 dark:border-slate-800 rounded-2xl text-xs font-semibold text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:bg-white dark:focus:bg-[#070a11] focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 transition-all duration-200;
+    @apply w-full px-4 py-3 bg-slate-100/70 dark:bg-[#070a11] border border-slate-200 dark:border-slate-800 rounded-2xl text-xs font-semibold text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:bg-white dark:focus:bg-[#070a11] focus:outline-none focus:ring-2 focus:ring-coral-500/40 focus:border-coral-500 transition-all duration-200;
 }
 
 @utility form-label {
@@ -81,7 +113,7 @@
 
 /* 4. BOTONES LUMINOSOS */
 @utility btn-primary {
-    @apply inline-flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white text-xs font-bold rounded-2xl shadow-lg shadow-indigo-500/25 dark:shadow-indigo-600/30 transition-all duration-200 cursor-pointer transform active:scale-95 hover:shadow-indigo-500/40;
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-coral-500 to-orange-600 hover:from-coral-400 hover:to-orange-500 text-white text-xs font-bold rounded-2xl shadow-lg shadow-coral-500/25 dark:shadow-coral-600/30 transition-all duration-200 cursor-pointer transform active:scale-95 hover:shadow-coral-500/40;
 }
 
 @utility btn-secondary {
@@ -98,7 +130,7 @@
 }
 
 @utility table-tr {
-    @apply hover:bg-indigo-50/40 dark:hover:bg-indigo-500/5 transition-colors duration-150 border-b border-slate-100 dark:border-slate-800/50 last:border-b-0;
+    @apply hover:bg-coral-50/40 dark:hover:bg-coral-500/5 transition-colors duration-150 border-b border-slate-100 dark:border-slate-800/50 last:border-b-0;
 }
 
 @utility table-td {
@@ -124,7 +156,7 @@
 }
 
 @utility modal-glow {
-    @apply pointer-events-none absolute -top-24 -left-24 w-80 h-80 bg-indigo-600/25 rounded-full blur-3xl;
+    @apply pointer-events-none absolute -top-24 -left-24 w-80 h-80 bg-coral-600/25 rounded-full blur-3xl;
 }
 
 @utility modal-header {

@@ -16,16 +16,19 @@ class DashboardController extends Controller
 
         // 🛑 CONTROL DE ACCESO ABSOLUTO:
         // Si es Operador (por rol) o NO tiene el permiso para ver métricas/reportes,
-        // lo redirigimos de inmediato al Control de Caja.
-        $esAdmin = ($user->id === 1 || $user->isAdmin());
+        // lo redirigimos de inmediato al Control de Caja SIN MOSTRAR ALERTAS.
+        $esAdmin = $user->isAdmin();
         $esOperador = ($user->role && $user->role->name === 'Operador');
 
         if ($esOperador || (! $esAdmin && ! $user->hasPermission('view-reports'))) {
-            return redirect()->route('caja.index')->with('info', 'Acceso al Dashboard restringido para el rol de Operador.');
+            return redirect()->route('caja.index');
         }
 
         // --- FILTRO DE MES PARA LA GRÁFICA Y ROTACIÓN ---
-        $selectedMonth = $request->input('month', now()->format('Y-m'));
+        $requestedMonth = $request->input('month');
+        $selectedMonth = is_string($requestedMonth) && preg_match('/^\d{4}-(0[1-9]|1[0-2])$/', $requestedMonth)
+            ? $requestedMonth
+            : now()->format('Y-m');
         $startOfMonth = Carbon::parse($selectedMonth.'-01')->startOfMonth();
         $endOfMonth = Carbon::parse($selectedMonth.'-01')->endOfMonth();
 
@@ -47,10 +50,7 @@ class DashboardController extends Controller
 
         // C-2. Dinero total de las ventas en el mes seleccionado
         $totalSalesMoney = InventoryMovement::where('type', 'salida')
-            ->where(function ($query) {
-                $query->where('reason', 'like', '%venta%')
-                    ->orWhere('reason', 'like', '%Venta%');
-            })
+            ->where('reason', 'like', 'Venta directa%')
             ->whereBetween('created_at', [$startOfMonth, $endOfMonth])
             ->get()
             ->sum(function ($movement) {
@@ -67,6 +67,8 @@ class DashboardController extends Controller
             ->get();
 
         $topProducts = InventoryMovement::select('product_id', DB::raw('SUM(quantity) as total_quantity'))
+            ->where('type', 'salida')
+            ->where('reason', 'like', 'Venta directa%')
             ->whereBetween('created_at', [$startOfMonth, $endOfMonth])
             ->groupBy('product_id')
             ->orderByDesc('total_quantity')

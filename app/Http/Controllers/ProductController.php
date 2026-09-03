@@ -26,14 +26,32 @@ class ProductController extends Controller
      */
     public function showImage($path)
     {
-        $cleanPath = str_replace('products/', '', $path);
-        $fullPath = 'products/'.$cleanPath;
+        $path = urldecode($path);
+        $path = str_replace("\0", '', $path);
+        $path = ltrim($path, '/');
+        $path = str_replace('\\', '/', $path);
 
-        if (! Storage::disk('public')->exists($fullPath)) {
+        if (strpos($path, '..') !== false) {
             abort(404);
         }
 
-        return response()->file(storage_path('app/public/'.$fullPath));
+        if (! str_starts_with($path, 'products/')) {
+            $path = 'products/' . $path;
+        }
+
+        if (! Storage::disk('public')->exists($path)) {
+            abort(404);
+        }
+
+        $full = Storage::disk('public')->path($path);
+        $productsDir = realpath(storage_path('app/public/products'));
+        $real = realpath($full);
+
+        if ($productsDir === false || $real === false || strpos($real, $productsDir) !== 0) {
+            abort(404);
+        }
+
+        return response()->file($real);
     }
 
     /**

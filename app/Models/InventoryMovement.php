@@ -21,7 +21,25 @@ class InventoryMovement extends Model
         'monto_recibido',
         'cambio',
         'date',
+        'notes', // <-- ¡AGREGADO AQUÍ para evitar errores de asignación masiva!
     ];
+
+    /**
+     * Accessor para extraer dinámicamente el método de pago desde las notas.
+     */
+    public function getMetodoPagoAttribute()
+    {
+        $notes = strtolower($this->notes ?? '');
+        
+        if (str_contains($notes, 'tarjeta')) {
+            return 'Tarjeta';
+        }
+        if (str_contains($notes, 'transferencia')) {
+            return 'Transferencia';
+        }
+        
+        return 'Efectivo';
+    }
 
     public function product()
     {

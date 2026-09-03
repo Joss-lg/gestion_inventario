@@ -20,13 +20,20 @@ class EnsureCajaAbierta
             return $next($request);
         }
 
-        // El Administrador (ID 1 o por método isAdmin) tiene acceso maestro
-        if ($user->id === 1 || $user->isAdmin()) {
+        if ($user->isAdmin()) {
             return $next($request);
         }
 
-        // Para cualquier otro usuario, verificar que tenga una caja activa
+        // Los usuarios operativos necesitan una caja abierta para continuar.
         if (! $user->cajaActiva()) {
+
+            // Si el bloqueo ocurre justo al entrar al dashboard (login),
+            // lo mandamos a abrir caja SIN mostrar la alerta de error.
+            if ($request->routeIs('dashboard')) {
+                return redirect()->route('caja.index');
+            }
+
+            // En cualquier otra ruta protegida (POS, Stock, etc.) sí mostramos el aviso.
             return redirect()->route('caja.index')->with('error', 'Debes abrir el turno de caja para realizar movimientos u operaciones.');
         }
 
