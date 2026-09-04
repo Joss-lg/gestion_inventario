@@ -11,7 +11,7 @@
         {{-- COLUMNA IZQUIERDA: CATÁLOGO DE PRODUCTOS --}}
         <div class="lg:col-span-7 xl:col-span-8 flex flex-col h-[65vh] lg:h-[calc(100vh-8.5rem)] bg-white dark:bg-[#0e1322] rounded-2xl border border-slate-200 dark:border-slate-800/80 shadow-xs overflow-hidden">
 
-            {{-- Buscador y Categorías (Fijo) --}}
+            {{-- Buscador y Categorías --}}
             <div class="p-3 sm:p-4 border-b border-slate-200 dark:border-slate-800/80 space-y-3 bg-slate-50/50 dark:bg-[#0b0f19]/30 shrink-0">
                 <div class="relative">
                     <input type="text"
@@ -41,7 +41,7 @@
                 </div>
             </div>
 
-            {{-- Grid de Productos con Scroll Nativo y Fluido --}}
+            {{-- Grid de Productos --}}
             <div class="flex-1 overflow-y-auto custom-scroll p-4">
                 <div class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-4 items-start">
                     <template x-for="product in filteredProducts" :key="product.id">
@@ -90,7 +90,7 @@
         {{-- COLUMNA DERECHA: CARRITO Y COBRO --}}
         <div id="cart-section" class="lg:col-span-5 xl:col-span-4 flex flex-col h-[65vh] lg:h-[calc(100vh-8.5rem)] lg:sticky lg:top-4 bg-white dark:bg-[#0e1322] rounded-2xl border border-slate-200 dark:border-slate-800/80 shadow-xs overflow-hidden">
 
-            {{-- Header Carrito (Fijo) --}}
+            {{-- Header Carrito --}}
             <div class="p-4 border-b border-slate-200 dark:border-slate-800/80 flex items-center justify-between bg-slate-50/50 dark:bg-[#0b0f19]/30 shrink-0">
                 <h3 class="font-extrabold text-slate-800 dark:text-white text-base flex items-center gap-2">
                     <svg class="w-5 h-5 text-[#FF6B4A]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
@@ -101,7 +101,7 @@
                 </button>
             </div>
 
-            {{-- Items Carrito con Scroll --}}
+            {{-- Items Carrito --}}
             <div class="flex-1 overflow-y-auto custom-scroll p-4 space-y-3">
                 <template x-if="cart.length === 0">
                     <div class="h-full flex flex-col items-center justify-center text-slate-400 py-8">
@@ -134,50 +134,188 @@
                 </template>
             </div>
 
-            {{-- Footer Cobro (Fijo) --}}
+            {{-- Footer Cobro --}}
             <div class="shrink-0 p-4 border-t border-slate-200 dark:border-slate-800/80 bg-slate-50/50 dark:bg-[#0b0f19]/30 space-y-3">
-                <div class="space-y-1.5">
-                    <div class="flex justify-between text-base font-black text-slate-900 dark:text-white pt-1">
-                        <span>Total a Pagar</span>
-                        <span class="text-[#F0552F] dark:text-[#FF8A65] text-lg" x-text="'$' + formatNumber(total)"></span>
-                    </div>
+                <div class="flex justify-between text-base font-black text-slate-900 dark:text-white">
+                    <span>Total a Pagar</span>
+                    <span class="text-[#F0552F] dark:text-[#FF8A65] text-xl" x-text="'$' + formatNumber(total)"></span>
                 </div>
 
-                <div class="grid grid-cols-3 gap-2">
-                    <button @click="paymentMethod = 'efectivo'" :class="paymentMethod === 'efectivo' ? 'border-[#F0552F] bg-[#FFF1EC] dark:bg-[#3A120A]/30 text-[#F0552F] dark:text-[#FF8A65] font-extrabold' : 'border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400'" class="py-2 text-xs rounded-xl border text-center transition-colors cursor-pointer">Efectivo</button>
-                    <button @click="paymentMethod = 'tarjeta'" :class="paymentMethod === 'tarjeta' ? 'border-[#F0552F] bg-[#FFF1EC] dark:bg-[#3A120A]/30 text-[#F0552F] dark:text-[#FF8A65] font-extrabold' : 'border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400'" class="py-2 text-xs rounded-xl border text-center transition-colors cursor-pointer">Tarjeta</button>
-                    <button @click="paymentMethod = 'transferencia'" :class="paymentMethod === 'transferencia' ? 'border-[#F0552F] bg-[#FFF1EC] dark:bg-[#3A120A]/30 text-[#F0552F] dark:text-[#FF8A65] font-extrabold' : 'border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400'" class="py-2 text-xs rounded-xl border text-center transition-colors cursor-pointer">Transf.</button>
+                {{-- Fila con 4 Botones de Pago --}}
+                <div class="grid grid-cols-4 gap-1.5">
+                    <button type="button" 
+                            @click="selectDirectPayment('efectivo')" 
+                            :class="paymentMethod === 'efectivo' && !isMultiPayMode 
+                                ? 'border-[#F0552F] bg-[#FFF1EC] dark:bg-[#3A120A]/40 text-[#F0552F] dark:text-[#FF8A65] font-extrabold ring-1 ring-[#F0552F]' 
+                                : 'border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-700'" 
+                            class="py-2 px-1 text-[11px] rounded-xl border text-center transition-all cursor-pointer truncate">
+                        Efectivo
+                    </button>
+                    
+                    <button type="button" 
+                            @click="selectDirectPayment('tarjeta')" 
+                            :class="paymentMethod === 'tarjeta' && !isMultiPayMode 
+                                ? 'border-[#F0552F] bg-[#FFF1EC] dark:bg-[#3A120A]/40 text-[#F0552F] dark:text-[#FF8A65] font-extrabold ring-1 ring-[#F0552F]' 
+                                : 'border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-700'" 
+                            class="py-2 px-1 text-[11px] rounded-xl border text-center transition-all cursor-pointer truncate">
+                        Tarjeta
+                    </button>
+                    
+                    <button type="button" 
+                            @click="selectDirectPayment('transferencia')" 
+                            :class="paymentMethod === 'transferencia' && !isMultiPayMode 
+                                ? 'border-[#F0552F] bg-[#FFF1EC] dark:bg-[#3A120A]/40 text-[#F0552F] dark:text-[#FF8A65] font-extrabold ring-1 ring-[#F0552F]' 
+                                : 'border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-700'" 
+                            class="py-2 px-1 text-[11px] rounded-xl border text-center transition-all cursor-pointer truncate">
+                        Transf.
+                    </button>
+
+                    <button type="button" 
+                            @click="abrirModalCobro()" 
+                            :class="isMultiPayMode 
+                                ? 'border-[#F0552F] bg-[#FFF1EC] dark:bg-[#3A120A]/40 text-[#F0552F] dark:text-[#FF8A65] font-extrabold ring-1 ring-[#F0552F]' 
+                                : 'border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-700'" 
+                            class="py-2 px-1 text-[11px] rounded-xl border text-center transition-all cursor-pointer truncate">
+                        Multi Pago
+                    </button>
                 </div>
 
-                <div x-show="paymentMethod === 'efectivo'" class="space-y-1">
+                {{-- Inputs para Pago Directo --}}
+                <div x-show="!isMultiPayMode && paymentMethod === 'efectivo'" class="space-y-1">
                     <label class="text-[11px] font-bold text-slate-500 dark:text-slate-400">Efectivo Recibido</label>
-                    <input type="number" step="1" min="0" x-model="receivedAmount" @wheel.prevent placeholder="0" 
-                           class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0b0f19] text-sm text-slate-800 dark:text-slate-100 font-bold focus:outline-none focus:ring-2 focus:ring-[#FF6B4A]/20 focus:border-[#F0552F] transition-colors appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none">
-                    <div x-show="receivedAmount > 0" class="flex justify-between text-xs pt-1 font-bold" :class="change >= 0 ? 'text-emerald-500' : 'text-rose-500'">
+                    <input type="number" step="0.01" min="0" x-model.number="receivedAmount" @wheel.prevent placeholder="0.00" 
+                           class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0b0f19] text-sm text-slate-800 dark:text-slate-100 font-bold focus:outline-none focus:ring-2 focus:ring-[#FF6B4A]/20 focus:border-[#F0552F] transition-colors">
+                    <div x-show="receivedAmount > 0" class="flex justify-between text-xs pt-1 font-bold" :class="singleChange >= 0 ? 'text-emerald-500' : 'text-rose-500'">
                         <span>Cambio:</span>
-                        <span x-text="'$' + formatNumber(change >= 0 ? change : 0)"></span>
+                        <span x-text="'$' + formatNumber(singleChange >= 0 ? singleChange : 0)"></span>
                     </div>
                 </div>
 
-                <div x-show="paymentMethod === 'tarjeta' || paymentMethod === 'transferencia'" class="space-y-1" x-cloak>
+                <div x-show="!isMultiPayMode && (paymentMethod === 'tarjeta' || paymentMethod === 'transferencia')" class="space-y-1" x-cloak>
                     <label class="text-[11px] font-bold text-slate-500 dark:text-slate-400" x-text="paymentMethod === 'tarjeta' ? 'Nº Voucher / Autorización' : 'Nº Referencia / Rastreo'"></label>
                     <input type="text" x-model="referenceNumber" placeholder="Ej: 12345678" class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0b0f19] text-sm text-slate-800 dark:text-slate-100 font-bold focus:outline-none focus:ring-2 focus:ring-[#FF6B4A]/20 focus:border-[#F0552F] transition-colors">
                 </div>
 
-                <button @click="processSale()"
-                        :disabled="cart.length === 0 || loading || (paymentMethod === 'efectivo' && receivedAmount < total) || ((paymentMethod === 'tarjeta' || paymentMethod === 'transferencia') && (!referenceNumber || referenceNumber.trim() === ''))"
-                        class="w-full py-3 rounded-xl bg-[#F0552F] hover:bg-[#D9431F] disabled:bg-slate-100 dark:disabled:bg-slate-900 disabled:text-slate-400 dark:disabled:text-slate-600 disabled:border disabled:border-slate-300 dark:disabled:border-slate-700 disabled:shadow-none text-white font-extrabold text-sm shadow-md shadow-[#F0552F]/20 transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed">
-                    <span x-show="!loading">Completar Venta</span>
+                {{-- Botón Completar Venta --}}
+                <button @click="isMultiPayMode ? abrirModalCobro() : processSale(false)"
+                        :disabled="cart.length === 0 || loading || (!isMultiPayMode && paymentMethod === 'efectivo' && receivedAmount < total) || (!isMultiPayMode && (paymentMethod === 'tarjeta' || paymentMethod === 'transferencia') && (!referenceNumber || referenceNumber.trim() === ''))"
+                        class="w-full py-3.5 rounded-xl bg-[#F0552F] hover:bg-[#D9431F] disabled:bg-slate-100 dark:disabled:bg-slate-900 disabled:text-slate-400 dark:disabled:text-slate-600 disabled:border disabled:border-slate-300 dark:disabled:border-slate-700 text-white font-extrabold text-sm shadow-md shadow-[#F0552F]/20 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed">
+                    <span x-show="!loading" x-text="isMultiPayMode ? 'Abrir Desglose Multi Pago' : 'Completar Venta'"></span>
                     <span x-show="loading" class="inline-block animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" x-cloak></span>
                 </button>
-
-                <p x-show="cart.length === 0" class="text-center text-[11px] font-semibold text-slate-400">Agrega productos al carrito para continuar</p>
-                <p x-show="cart.length > 0 && paymentMethod === 'efectivo' && receivedAmount < total" class="text-center text-[11px] font-semibold text-slate-400" x-cloak>Ingresa el efectivo recibido</p>
-                <p x-show="cart.length > 0 && (paymentMethod === 'tarjeta' || paymentMethod === 'transferencia') && (!referenceNumber || referenceNumber.trim() === '')" class="text-center text-[11px] font-semibold text-slate-400" x-cloak>Ingresa el número de referencia</p>
             </div>
         </div>
 
-        {{-- MODAL DEL TICKET --}}
+        {{-- MODAL MULTI PAGO --}}
+        <div x-show="showPayModal" x-cloak
+             class="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-md flex items-center justify-center p-3 sm:p-5"
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 scale-95"
+             x-transition:enter-end="opacity-100 scale-100"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100 scale-100"
+             x-transition:leave-end="opacity-0 scale-95">
+
+            <div @click.away="showPayModal = false"
+                 class="relative w-full max-w-lg max-h-[90vh] bg-white dark:bg-[#090d18] text-slate-900 dark:text-slate-100 rounded-[28px] border border-slate-200/80 dark:border-[#FF6B4A]/20 shadow-2xl flex flex-col overflow-hidden">
+
+                {{-- Header --}}
+                <div class="relative z-10 flex items-center justify-between p-4 border-b border-slate-100 dark:border-[#FF6B4A]/10 shrink-0">
+                    <div class="flex items-center gap-3">
+                        <span class="w-2.5 h-2.5 rounded-full bg-[#FF6B4A] shadow-[0_0_10px_rgba(255,107,74,0.8)]"></span>
+                        <h3 class="text-xs sm:text-sm font-black uppercase tracking-wider text-slate-900 dark:text-white">Desglose Multi Pago</h3>
+                    </div>
+                    <button type="button" @click="showPayModal = false"
+                            class="w-8 h-8 rounded-full bg-[#FFF1EC] dark:bg-[#3A120A]/40 hover:bg-[#FFE1D6] dark:hover:bg-[#5C1B0E]/60 text-[#FF6B4A] dark:text-[#FF8A65] font-bold transition flex items-center justify-center cursor-pointer">
+                        ✕
+                    </button>
+                </div>
+
+                {{-- Body --}}
+                <div class="p-4 sm:p-6 overflow-y-auto custom-scroll space-y-4">
+                    <div class="grid grid-cols-3 gap-2 p-3.5 bg-slate-50 dark:bg-[#0b0f19]/60 rounded-2xl border border-slate-100 dark:border-slate-800/60 text-center">
+                        <div>
+                            <span class="text-[10px] font-extrabold uppercase text-slate-400 block">Total Venta</span>
+                            <p class="text-sm sm:text-base font-black text-slate-900 dark:text-white mt-0.5" x-text="'$' + formatNumber(total)"></p>
+                        </div>
+                        <div>
+                            <span class="text-[10px] font-extrabold uppercase text-slate-400 block">Monto Cubierto</span>
+                            <p class="text-sm sm:text-base font-black text-emerald-500 mt-0.5" x-text="'$' + formatNumber(totalPagado)"></p>
+                        </div>
+                        <div>
+                            <span class="text-[10px] font-extrabold uppercase text-slate-400 block" x-text="faltante > 0 ? 'Faltante' : 'Cambio'"></span >
+                            <p class="text-sm sm:text-base font-black mt-0.5"
+                               :class="faltante > 0 ? 'text-rose-500' : 'text-amber-500'" 
+                               x-text="'$' + formatNumber(faltante > 0 ? faltante : cambio)"></p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2.5">
+                        <label class="text-xs font-bold text-slate-500 dark:text-slate-400">Métodos de Pago Aplicados</label>
+                        
+                        <template x-for="(pago, index) in pagos" :key="index">
+                            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 bg-slate-50/50 dark:bg-[#0b0f19]/30 p-2.5 rounded-xl border border-slate-200/80 dark:border-slate-800/80">
+                                <select x-model="pago.metodo" 
+                                        class="sm:w-1/3 text-xs font-bold rounded-lg border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0b0f19] text-slate-800 dark:text-slate-100 focus:ring-[#FF6B4A]/20 focus:border-[#F0552F]">
+                                    <option value="efectivo">Efectivo</option>
+                                    <option value="tarjeta">Tarjeta</option>
+                                    <option value="transferencia">Transferencia</option>
+                                </select>
+
+                                <div class="relative sm:w-1/3">
+                                    <span class="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs font-extrabold text-slate-400">$</span>
+                                    <input type="number" 
+                                           step="0.01" 
+                                           min="0"
+                                           x-model.number="pago.monto" 
+                                           class="w-full pl-6 pr-2 py-2 text-xs font-extrabold rounded-lg border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0b0f19] text-slate-800 dark:text-slate-100 focus:ring-[#FF6B4A]/20 focus:border-[#F0552F]" 
+                                           placeholder="0.00">
+                                </div>
+
+                                <div class="flex items-center gap-2 sm:w-1/3">
+                                    <input type="text" 
+                                           x-model="pago.referencia" 
+                                           :placeholder="pago.metodo === 'efectivo' ? 'N/A' : 'Ref / Voucher'"
+                                           :disabled="pago.metodo === 'efectivo'"
+                                           class="w-full text-xs font-medium rounded-lg border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0b0f19] text-slate-800 dark:text-slate-100 disabled:opacity-40 focus:ring-[#FF6B4A]/20 focus:border-[#F0552F]">
+
+                                    <button type="button" 
+                                            @click="removerMetodoPago(index)" 
+                                            :disabled="pagos.length === 1"
+                                            class="text-rose-500 hover:text-rose-600 p-1 font-extrabold disabled:opacity-20 cursor-pointer">
+                                        ✕
+                                    </button>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+
+                    <button type="button" 
+                            @click="agregarMetodoPago()" 
+                            class="w-full py-2.5 text-xs font-extrabold text-[#F0552F] dark:text-[#FF8A65] border border-dashed border-[#F0552F]/40 hover:border-[#F0552F] rounded-xl bg-[#FFF1EC]/50 dark:bg-[#3A120A]/20 transition-colors cursor-pointer">
+                        + Dividir Pago / Agregar Otro Método
+                    </button>
+                </div>
+
+                {{-- Footer --}}
+                <div class="p-4 border-t border-slate-100 dark:border-[#FF6B4A]/10 shrink-0 bg-slate-50/50 dark:bg-[#0b0f19]/30 flex items-center justify-end gap-3">
+                    <button type="button" 
+                            @click="showPayModal = false" 
+                            class="px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-600 dark:text-slate-300 text-xs font-extrabold transition cursor-pointer">
+                        Cancelar
+                    </button>
+                    <button type="button" 
+                            @click="processSale(true)" 
+                            :disabled="loading || totalPagado < total" 
+                            class="px-6 py-2.5 rounded-xl bg-[#F0552F] hover:bg-[#D9431F] disabled:bg-slate-300 dark:disabled:bg-slate-800 text-white text-xs font-extrabold shadow-md shadow-[#F0552F]/20 transition cursor-pointer flex items-center gap-2 disabled:cursor-not-allowed">
+                        <span x-show="!loading">Confirmar y Registrar Venta</span>
+                        <span x-show="loading" class="inline-block animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" x-cloak></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        {{-- MODAL TICKET --}}
         <div x-show="showTicket" x-cloak
              class="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-md flex items-center justify-center p-3 sm:p-5"
              x-transition:enter="transition ease-out duration-300"

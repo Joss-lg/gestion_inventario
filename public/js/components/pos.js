@@ -1,5 +1,6 @@
 document.addEventListener('alpine:init', () => {
     Alpine.data('posApp', () => ({
+        // === ESTADO BASE ===
         products: window.posData ? window.posData.products : [],
         storeUrl: window.posData ? window.posData.storeUrl : '',
         csrfToken: window.posData ? window.posData.csrfToken : '',
@@ -7,14 +8,21 @@ document.addEventListener('alpine:init', () => {
         search: '',
         selectedCategory: 'all',
         cart: [],
+        loading: false,
+
+        // === ESTADO DE PAGO DIRECTO ===
         paymentMethod: 'efectivo',
         receivedAmount: '',
         referenceNumber: '',
-        loading: false,
+        isMultiPayMode: false,
 
-        // === ESTADO DEL TICKET ===
+        // === ESTADO DE MULTI PAGO Y MODALES ===
+        showPayModal: false,
         showTicket: false,
         lastTicket: null,
+        pagos: [
+            { metodo: 'efectivo', monto: 0, referencia: '' }
+        ],
 
         init() {
             this.$nextTick(() => {
@@ -24,6 +32,7 @@ document.addEventListener('alpine:init', () => {
             });
         },
 
+        // === GETTERS ===
         get filteredProducts() {
             return this.products.filter(product => {
                 const matchesCategory = this.selectedCategory === 'all' || product.category_id == this.selectedCategory;
@@ -38,36 +47,66 @@ document.addEventListener('alpine:init', () => {
             return this.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
         },
 
-        get change() {
+        get singleChange() {
             const received = parseFloat(this.receivedAmount) || 0;
             return received - this.total;
         },
 
+        get totalPagado() {
+            return this.pagos.reduce((sum, p) => sum + (parseFloat(p.monto) || 0), 0);
+        },
+
+        get faltante() {
+            const diff = this.total - this.totalPagado;
+            return diff > 0 ? parseFloat(diff.toFixed(2)) : 0;
+        },
+
+        get cambio() {
+            const diff = this.totalPagado - this.total;
+            return diff > 0 ? parseFloat(diff.toFixed(2)) : 0;
+        },
+
+        // === GESTIÓN DE PAGO ===
+        selectDirectPayment(method) {
+            this.isMultiPayMode = false;
+            this.paymentMethod = method;
+            this.showPayModal = false;
+        },
+
+        abrirModalCobro() {
+            if (this.cart.length === 0) return;
+            this.isMultiPayMode = true;
+            this.pagos = [
+                { metodo: 'efectivo', monto: parseFloat(this.total.toFixed(2)), referencia: '' }
+            ];
+            this.showPayModal = true;
+        },
+
+        agregarMetodoPago() {
+            const faltanteActual = this.faltante;
+            this.pagos.push({
+                metodo: 'tarjeta',
+                monto: faltanteActual > 0 ? parseFloat(faltanteActual.toFixed(2)) : 0,
+                referencia: ''
+            });
+        },
+
+        removerMetodoPago(index) {
+            if (this.pagos.length > 1) {
+                this.pagos.splice(index, 1);
+            }
+        },
+
+        // === LÓGICA DE BADGES Y CARRITO ===
         getStockBadge(stock) {
             if (stock <= 0) {
-                return {
-                    text: 'Agotado',
-                    classes: 'bg-slate-800 text-slate-200 border-slate-700 opacity-60',
-                    disabled: true
-                };
+                return { text: 'Agotado', classes: 'bg-slate-800 text-slate-200 border-slate-700 opacity-60', disabled: true };
             } else if (stock <= 5) {
-                return {
-                    text: `¡Quedan ${stock}!`,
-                    classes: 'bg-red-500/10 text-red-500 border-red-500/30 animate-pulse',
-                    disabled: false
-                };
+                return { text: `¡Quedan ${stock}!`, classes: 'bg-red-500/10 text-red-500 border-red-500/30 animate-pulse', disabled: false };
             } else if (stock < 10) {
-                return {
-                    text: `Quedan ${stock}`,
-                    classes: 'bg-amber-500/10 text-amber-500 border-amber-500/30',
-                    disabled: false
-                };
+                return { text: `Quedan ${stock}`, classes: 'bg-amber-500/10 text-amber-500 border-amber-500/30', disabled: false };
             } else {
-                return {
-                    text: `Stock: ${stock}`,
-                    classes: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/30',
-                    disabled: false
-                };
+                return { text: `Stock: ${stock}`, classes: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/30', disabled: false };
             }
         },
 
@@ -156,8 +195,12 @@ document.addEventListener('alpine:init', () => {
             this.cart = [];
             this.receivedAmount = '';
             this.referenceNumber = '';
+            this.isMultiPayMode = false;
+            this.showPayModal = false;
+            this.pagos = [{ metodo: 'efectivo', monto: 0, referencia: '' }];
         },
 
+        // === FORMATOS Y UTILIDADES ===
         formatNumber(value) {
             return new Intl.NumberFormat('es-MX', {
                 minimumFractionDigits: 2,
@@ -174,27 +217,83 @@ document.addEventListener('alpine:init', () => {
             window.print();
         },
 
-        async processSale() {
+        // === PROCESAMIENTO DE VENTA ===
+        async processSale(isMultiPay = false) {
             if (this.cart.length === 0) return;
 
-            if (this.paymentMethod === 'efectivo' && this.change < 0) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Monto insuficiente',
-                    text: 'El efectivo recibido es menor al total a pagar.',
-                    confirmButtonColor: '#4f46e5'
-                });
-                return;
-            }
+            let payloadPagos = [];
 
-            if ((this.paymentMethod === 'tarjeta' || this.paymentMethod === 'transferencia') && !this.referenceNumber.trim()) {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Referencia requerida',
-                    text: `Por favor ingresa el número de ${this.paymentMethod === 'tarjeta' ? 'voucher / autorización' : 'referencia / rastreo'}.`,
-                    confirmButtonColor: '#4f46e5'
-                });
-                return;
+            // Validaciones según la modalidad de pago
+            if (isMultiPay || this.isMultiPayMode) {
+                const pagosValidos = this.pagos
+                    .map(pago => ({
+                        metodo: pago.metodo,
+                        monto: Math.round((parseFloat(pago.monto) || 0) * 100) / 100,
+                        referencia: pago.referencia ? pago.referencia.trim() : null
+                    }))
+                    .filter(pago => pago.monto > 0);
+                const totalPagadoCentavos = pagosValidos.reduce((sum, pago) => sum + Math.round(pago.monto * 100), 0);
+                const totalVentaCentavos = Math.round(this.total * 100);
+
+                if (totalPagadoCentavos < totalVentaCentavos) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Monto insuficiente',
+                        text: 'El total pagado en el desglose es menor al total a pagar.',
+                        confirmButtonColor: '#F0552F'
+                    });
+                    return;
+                }
+
+                for (const pago of pagosValidos) {
+                    if (pago.metodo !== 'efectivo' && (!pago.referencia || !pago.referencia.trim())) {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Referencia requerida',
+                            text: `Ingresa el número de referencia para el pago en ${this.formatMetodo(pago.metodo)}.`,
+                            confirmButtonColor: '#F0552F'
+                        });
+                        return;
+                    }
+                }
+
+                if (pagosValidos.length === 0) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Pago requerido',
+                        text: 'Agrega al menos un monto de pago válido.',
+                        confirmButtonColor: '#F0552F'
+                    });
+                    return;
+                }
+
+                payloadPagos = pagosValidos;
+            } else {
+                if (this.paymentMethod === 'efectivo' && this.singleChange < 0) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Monto insuficiente',
+                        text: 'El efectivo recibido es menor al total a pagar.',
+                        confirmButtonColor: '#F0552F'
+                    });
+                    return;
+                }
+
+                if ((this.paymentMethod === 'tarjeta' || this.paymentMethod === 'transferencia') && !this.referenceNumber.trim()) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Referencia requerida',
+                        text: `Por favor ingresa el número de ${this.paymentMethod === 'tarjeta' ? 'voucher / autorización' : 'referencia / rastreo'}.`,
+                        confirmButtonColor: '#F0552F'
+                    });
+                    return;
+                }
+
+                payloadPagos = [{
+                    metodo: this.paymentMethod,
+                    monto: this.paymentMethod === 'efectivo' ? parseFloat(this.receivedAmount) : this.total,
+                    referencia: this.referenceNumber.trim() || null
+                }];
             }
 
             this.loading = true;
@@ -209,9 +308,11 @@ document.addEventListener('alpine:init', () => {
                     },
                     body: JSON.stringify({
                         items: this.cart,
-                        metodo_pago: this.paymentMethod,
-                        monto_recibido: this.paymentMethod === 'efectivo' ? parseFloat(this.receivedAmount) : this.total,
-                        num_referencia: this.referenceNumber.trim(),
+                        pagos: payloadPagos,
+                        // Campos de compatibilidad hacia atrás
+                        metodo_pago: payloadPagos[0].metodo,
+                        monto_recibido: payloadPagos[0].monto,
+                        num_referencia: payloadPagos[0].referencia,
                         total: this.total
                     })
                 });
@@ -228,14 +329,18 @@ document.addEventListener('alpine:init', () => {
                     this.lastTicket = data.ticket;
                     this.showTicket = true;
 
-                    // === NOTIFICACIÓN DE VENTA REALIZADA ===
-                    const recibido = this.paymentMethod === 'efectivo' ? parseFloat(this.receivedAmount) : this.total;
-                    const cambio = this.paymentMethod === 'efectivo' ? Math.max(0, recibido - this.total) : 0;
-
+                    // Mensaje de éxito SweetAlert2
                     let htmlMensaje = `<strong>Total: $${this.formatNumber(this.total)}</strong>`;
-                    if (this.paymentMethod === 'efectivo') {
+                    if (!isMultiPay && !this.isMultiPayMode && this.paymentMethod === 'efectivo') {
+                        const recibido = parseFloat(this.receivedAmount);
+                        const cambio = Math.max(0, recibido - this.total);
                         htmlMensaje += `<br>Recibido: $${this.formatNumber(recibido)}`;
                         htmlMensaje += `<br>Cambio: $${this.formatNumber(cambio)}`;
+                    } else if (isMultiPay || this.isMultiPayMode) {
+                        htmlMensaje += `<br>Pagado: $${this.formatNumber(this.totalPagado)}`;
+                        if (this.cambio > 0) {
+                            htmlMensaje += `<br>Cambio: $${this.formatNumber(this.cambio)}`;
+                        }
                     }
 
                     Swal.fire({
@@ -259,7 +364,7 @@ document.addEventListener('alpine:init', () => {
                     icon: 'error',
                     title: 'Error en la venta',
                     text: error.message || 'Error de comunicación con el servidor.',
-                    confirmButtonColor: '#4f46e5'
+                    confirmButtonColor: '#F0552F'
                 });
             } finally {
                 this.loading = false;

@@ -27,11 +27,11 @@
         /* MÓVIL (< 1024px): el sidebar SIEMPRE se muestra completo (con texto), nunca colapsado a solo iconos */
         @media (max-width: 1023.98px) {
             #sidebar-menu {
-                width: 18rem !important; /* 288px exactos, igual que el modo expandido de escritorio */
+                width: 18rem !important; /* 288px exactos */
             }
         }
 
-        /* ESCRITORIO (>= 1024px): aquí sí aplica el colapso a solo iconos */
+        /* ESCRITORIO (>= 1024px): colapso a solo iconos */
         @media (min-width: 1024px) {
             html.sidebar-collapsed #sidebar-menu {
                 width: 5rem !important; /* 80px exactos */
@@ -50,6 +50,22 @@
                 justify-content: center !important;
                 padding-left: 0.5rem !important;
                 padding-right: 0.5rem !important;
+            }
+
+            /* Centrado perfecto de los enlaces e iconos activos en estado colapsado */
+            html.sidebar-collapsed #sidebar-menu nav a {
+                justify-content: center !important;
+                padding-left: 0 !important;
+                padding-right: 0 !important;
+                margin-left: auto !important;
+                margin-right: auto !important;
+                width: 2.75rem !important;  /* 44px de ancho */
+                height: 2.75rem !important; /* 44px de alto para formar un cuadrado perfecto */
+            }
+
+            html.sidebar-collapsed #sidebar-menu nav a > div {
+                justify-content: center !important;
+                gap: 0 !important;
             }
         }
 
@@ -109,10 +125,10 @@
         {{-- BARRA LATERAL (SIDEBAR) --}}
         <aside id="sidebar-menu"
                :class="{
-                    'translate-x-0': sidebarOpen, 
-                    '-translate-x-full': !sidebarOpen
-                }" 
-                class="fixed lg:static inset-y-0 left-0 z-50 bg-white dark:bg-[#0e1322] text-slate-600 dark:text-slate-300 flex-shrink-0 flex flex-col border-r border-slate-200 dark:border-slate-800/80 h-full -translate-x-full lg:translate-x-0">
+                   'translate-x-0': sidebarOpen, 
+                   '-translate-x-full': !sidebarOpen
+               }" 
+               class="fixed lg:static inset-y-0 left-0 z-50 bg-white dark:bg-[#0e1322] text-slate-600 dark:text-slate-300 flex-shrink-0 flex flex-col border-r border-slate-200 dark:border-slate-800/80 h-full -translate-x-full lg:translate-x-0">
             
             {{-- ENCABEZADO LOGO --}}
             <div class="center-on-collapse h-20 flex items-center justify-between px-4 md:px-5 bg-slate-50/80 dark:bg-[#0b0f19]/50 border-b border-slate-200 dark:border-slate-800/80 flex-shrink-0">

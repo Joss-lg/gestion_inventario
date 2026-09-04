@@ -7,12 +7,21 @@
 <x-app-container>
 <div class="space-y-8" x-data="{ 
     openModal: false,
+    showVentaModal: false,
+    ventaActual: null,
     turnoSeleccionado: null,
     cargando: false,
     error: false,
 
+    verDetalleVenta(venta) {
+        this.ventaActual = venta;
+        this.showVentaModal = true;
+    },
+
     async verMovimientos(id) {
         this.openModal = true;
+        this.showVentaModal = false;
+        this.ventaActual = null;
         this.cargando = true;
         this.error = false;
         this.turnoSeleccionado = null;
@@ -384,6 +393,7 @@
                                             <th class="p-2.5">Recibido</th>
                                             <th class="p-2.5">Cambio/Ref</th>
                                             <th class="p-2.5">Método</th>
+                                                            <th class="p-2.5 text-center">Acciones</th>
                                         </tr>
                                     </thead>
                                     <tbody class="divide-y divide-[#FFE1D6] dark:divide-[#FF6B4A]/10">
@@ -414,11 +424,22 @@
                                                         }"
                                                         x-text="venta.metodo"></span>
                                                 </td>
+                                                <td class="p-2.5 text-center">
+                                                    <button type="button"
+                                                            @click="verDetalleVenta(venta)"
+                                                            title="Ver productos de la venta"
+                                                            class="inline-flex items-center justify-center w-8 h-8 rounded-lg text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 hover:bg-emerald-500/20 hover:text-emerald-300 transition-colors cursor-pointer">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"/>
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                                        </svg>
+                                                    </button>
+                                                </td>
                                             </tr>
                                         </template>
                                         <template x-if="!turnoSeleccionado?.ventas || turnoSeleccionado.ventas.length === 0">
                                             <tr>
-                                                <td colspan="5" class="p-4 text-center text-slate-400 font-semibold">No hay ventas registradas en este turno.</td>
+                                                <td colspan="6" class="p-4 text-center text-slate-400 font-semibold">No hay ventas registradas en este turno.</td>
                                             </tr>
                                         </template>
                                     </tbody>
@@ -469,6 +490,58 @@
                 </button>
             </div>
 
+        </div>
+    </div>
+
+    {{-- SUBMODAL DETALLE DE PRODUCTOS DE LA VENTA --}}
+    <div x-show="showVentaModal"
+         x-cloak
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0 scale-95"
+         x-transition:enter-end="opacity-100 scale-100"
+         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave-start="opacity-100 scale-100"
+         x-transition:leave-end="opacity-0 scale-95"
+         @keydown.escape.window="showVentaModal = false"
+         class="fixed inset-0 z-[60] bg-slate-950/75 backdrop-blur-sm flex items-center justify-center p-4">
+        <div @click.away="showVentaModal = false"
+             class="w-full max-w-md bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-2xl overflow-hidden">
+            <div class="flex items-center justify-between px-5 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/60">
+                <div>
+                    <h3 class="text-sm font-black uppercase tracking-wider text-slate-900 dark:text-white">Detalle de Venta</h3>
+                    <p class="text-[11px] text-slate-400 mt-1" x-text="ventaActual ? `Venta #${ventaActual.id}` : ''"></p>
+                </div>
+                <button type="button"
+                        @click="showVentaModal = false"
+                        title="Cerrar detalle"
+                        class="w-8 h-8 inline-flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-700 transition-colors cursor-pointer">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="p-5 space-y-3">
+                <div class="flex items-center justify-between text-[10px] font-black uppercase tracking-wider text-slate-400">
+                    <span>Producto</span>
+                    <span>Subtotal</span>
+                </div>
+                <div class="divide-y divide-slate-200 dark:divide-slate-800 border-y border-slate-200 dark:border-slate-800">
+                    <template x-for="(producto, index) in (ventaActual?.productos || [])" :key="`${producto.nombre}-${index}`">
+                        <div class="flex items-center justify-between gap-4 py-3">
+                            <div class="min-w-0">
+                                <p class="text-xs font-bold text-slate-800 dark:text-slate-100 truncate" x-text="producto.nombre"></p>
+                                <p class="text-[11px] text-slate-400 mt-0.5" x-text="`${producto.cantidad} unidad${producto.cantidad === 1 ? '' : 'es'}`"></p>
+                            </div>
+                            <span class="text-xs font-black text-emerald-600 dark:text-emerald-400 whitespace-nowrap" x-text="`$${parseFloat(producto.subtotal || 0).toFixed(2)}`"></span>
+                        </div>
+                    </template>
+                </div>
+                <div class="flex items-center justify-between pt-1">
+                    <span class="text-xs font-black uppercase text-slate-500 dark:text-slate-400">Total venta</span>
+                    <span class="text-base font-black text-emerald-600 dark:text-emerald-400" x-text="ventaActual ? `$${parseFloat(ventaActual.total || 0).toFixed(2)}` : '$0.00'"></span>
+                </div>
+            </div>
         </div>
     </div>
 
