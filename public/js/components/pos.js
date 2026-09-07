@@ -16,13 +16,15 @@ document.addEventListener('alpine:init', () => {
         referenceNumber: '',
         isMultiPayMode: false,
 
-        // === ESTADO DE MULTI PAGO Y MODALES ===
+        // === ESTADO DE MULTI PAGO FIJO ===
         showPayModal: false,
         showTicket: false,
         lastTicket: null,
-        pagos: [
-            { metodo: 'efectivo', monto: 0, referencia: '' }
-        ],
+        pagoEfectivo: 0,
+        pagoTarjeta: 0,
+        refTarjeta: '',
+        pagoTransferencia: 0,
+        refTransferencia: '',
 
         init() {
             this.$nextTick(() => {
@@ -53,7 +55,9 @@ document.addEventListener('alpine:init', () => {
         },
 
         get totalPagado() {
-            return this.pagos.reduce((sum, p) => sum + (parseFloat(p.monto) || 0), 0);
+            return (parseFloat(this.pagoEfectivo) || 0) + 
+                   (parseFloat(this.pagoTarjeta) || 0) + 
+                   (parseFloat(this.pagoTransferencia) || 0);
         },
 
         get faltante() {
@@ -76,25 +80,13 @@ document.addEventListener('alpine:init', () => {
         abrirModalCobro() {
             if (this.cart.length === 0) return;
             this.isMultiPayMode = true;
-            this.pagos = [
-                { metodo: 'efectivo', monto: parseFloat(this.total.toFixed(2)), referencia: '' }
-            ];
+            // Limpia y precarga el total completo en efectivo por defecto
+            this.pagoEfectivo = parseFloat(this.total.toFixed(2));
+            this.pagoTarjeta = 0;
+            this.refTarjeta = '';
+            this.pagoTransferencia = 0;
+            this.refTransferencia = '';
             this.showPayModal = true;
-        },
-
-        agregarMetodoPago() {
-            const faltanteActual = this.faltante;
-            this.pagos.push({
-                metodo: 'tarjeta',
-                monto: faltanteActual > 0 ? parseFloat(faltanteActual.toFixed(2)) : 0,
-                referencia: ''
-            });
-        },
-
-        removerMetodoPago(index) {
-            if (this.pagos.length > 1) {
-                this.pagos.splice(index, 1);
-            }
         },
 
         // === LÓGICA DE BADGES Y CARRITO ===
@@ -197,7 +189,11 @@ document.addEventListener('alpine:init', () => {
             this.referenceNumber = '';
             this.isMultiPayMode = false;
             this.showPayModal = false;
-            this.pagos = [{ metodo: 'efectivo', monto: 0, referencia: '' }];
+            this.pagoEfectivo = 0;
+            this.pagoTarjeta = 0;
+            this.refTarjeta = '';
+            this.pagoTransferencia = 0;
+            this.refTransferencia = '';
         },
 
         // === FORMATOS Y UTILIDADES ===
@@ -223,16 +219,16 @@ document.addEventListener('alpine:init', () => {
 
             let payloadPagos = [];
 
-            // Validaciones según la modalidad de pago
             if (isMultiPay || this.isMultiPayMode) {
-                const pagosValidos = this.pagos
-                    .map(pago => ({
-                        metodo: pago.metodo,
-                        monto: Math.round((parseFloat(pago.monto) || 0) * 100) / 100,
-                        referencia: pago.referencia ? pago.referencia.trim() : null
-                    }))
-                    .filter(pago => pago.monto > 0);
-                const totalPagadoCentavos = pagosValidos.reduce((sum, pago) => sum + Math.round(pago.monto * 100), 0);
+                const efec = Math.round((parseFloat(this.pagoEfectivo) || 0) * 100) / 100;
+                const tar = Math.round((parseFloat(this.pagoTarjeta) || 0) * 100) / 100;
+                const transf = Math.round((parseFloat(this.pagoTransferencia) || 0) * 100) / 100;
+
+                if (efec > 0) payloadPagos.push({ metodo: 'efectivo', monto: efec, referencia: null });
+                if (tar > 0) payloadPagos.push({ metodo: 'tarjeta', monto: tar, referencia: this.refTarjeta ? this.refTarjeta.trim() : null });
+                if (transf > 0) payloadPagos.push({ metodo: 'transferencia', monto: transf, referencia: this.refTransferencia ? this.refTransferencia.trim() : null });
+
+                const totalPagadoCentavos = Math.round(this.totalPagado * 100);
                 const totalVentaCentavos = Math.round(this.total * 100);
 
                 if (totalPagadoCentavos < totalVentaCentavos) {
@@ -245,19 +241,27 @@ document.addEventListener('alpine:init', () => {
                     return;
                 }
 
-                for (const pago of pagosValidos) {
-                    if (pago.metodo !== 'efectivo' && (!pago.referencia || !pago.referencia.trim())) {
-                        Swal.fire({
-                            icon: 'warning',
-                            title: 'Referencia requerida',
-                            text: `Ingresa el número de referencia para el pago en ${this.formatMetodo(pago.metodo)}.`,
-                            confirmButtonColor: '#F0552F'
-                        });
-                        return;
-                    }
+                if (tar > 0 && (!this.refTarjeta || !this.refTarjeta.trim())) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Referencia requerida',
+                        text: 'Ingresa el número de referencia / voucher para el pago con Tarjeta.',
+                        confirmButtonColor: '#F0552F'
+                    });
+                    return;
                 }
 
-                if (pagosValidos.length === 0) {
+                if (transf > 0 && (!this.refTransferencia || !this.refTransferencia.trim())) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Referencia requerida',
+                        text: 'Ingresa el número de referencia para el pago por Transferencia.',
+                        confirmButtonColor: '#F0552F'
+                    });
+                    return;
+                }
+
+                if (payloadPagos.length === 0) {
                     Swal.fire({
                         icon: 'error',
                         title: 'Pago requerido',
@@ -266,8 +270,6 @@ document.addEventListener('alpine:init', () => {
                     });
                     return;
                 }
-
-                payloadPagos = pagosValidos;
             } else {
                 if (this.paymentMethod === 'efectivo' && this.singleChange < 0) {
                     Swal.fire({
@@ -309,7 +311,6 @@ document.addEventListener('alpine:init', () => {
                     body: JSON.stringify({
                         items: this.cart,
                         pagos: payloadPagos,
-                        // Campos de compatibilidad hacia atrás
                         metodo_pago: payloadPagos[0].metodo,
                         monto_recibido: payloadPagos[0].monto,
                         num_referencia: payloadPagos[0].referencia,
@@ -320,7 +321,6 @@ document.addEventListener('alpine:init', () => {
                 const data = await response.json();
 
                 if (response.ok && data.success) {
-                    // Descontar stock localmente
                     this.cart.forEach(item => {
                         const product = this.products.find(p => p.id == item.id);
                         if (product) product.stock -= item.quantity;
@@ -329,7 +329,6 @@ document.addEventListener('alpine:init', () => {
                     this.lastTicket = data.ticket;
                     this.showTicket = true;
 
-                    // Mensaje de éxito SweetAlert2
                     let htmlMensaje = `<strong>Total: $${this.formatNumber(this.total)}</strong>`;
                     if (!isMultiPay && !this.isMultiPayMode && this.paymentMethod === 'efectivo') {
                         const recibido = parseFloat(this.receivedAmount);

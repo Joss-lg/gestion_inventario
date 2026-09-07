@@ -206,114 +206,118 @@
             </div>
         </div>
 
-        {{-- MODAL MULTI PAGO --}}
-        <div x-show="showPayModal" x-cloak
-             class="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-md flex items-center justify-center p-3 sm:p-5"
-             x-transition:enter="transition ease-out duration-300"
-             x-transition:enter-start="opacity-0 scale-95"
-             x-transition:enter-end="opacity-100 scale-100"
-             x-transition:leave="transition ease-in duration-200"
-             x-transition:leave-start="opacity-100 scale-100"
-             x-transition:leave-end="opacity-0 scale-95">
+        {{-- MODAL MULTI PAGO FIJO --}}
+<div x-show="showPayModal" x-cloak
+     role="dialog" aria-modal="true" aria-labelledby="modal-multi-pago-title"
+     class="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-md flex items-center justify-center p-3 sm:p-5"
+     x-transition:enter="transition ease-out duration-300"
+     x-transition:enter-start="opacity-0 scale-95"
+     x-transition:enter-end="opacity-100 scale-100"
+     x-transition:leave="transition ease-in duration-200"
+     x-transition:leave-start="opacity-100 scale-100"
+     x-transition:leave-end="opacity-0 scale-95">
 
-            <div @click.away="showPayModal = false"
-                 class="relative w-full max-w-lg max-h-[90vh] bg-white dark:bg-[#090d18] text-slate-900 dark:text-slate-100 rounded-[28px] border border-slate-200/80 dark:border-[#FF6B4A]/20 shadow-2xl flex flex-col overflow-hidden">
+    <div @click.away="showPayModal = false"
+         class="relative w-full max-w-lg max-h-[90vh] bg-white dark:bg-[#090d18] text-slate-900 dark:text-slate-100 rounded-[28px] border border-slate-200/80 dark:border-[#FF6B4A]/20 shadow-2xl flex flex-col overflow-hidden">
 
-                {{-- Header --}}
-                <div class="relative z-10 flex items-center justify-between p-4 border-b border-slate-100 dark:border-[#FF6B4A]/10 shrink-0">
-                    <div class="flex items-center gap-3">
-                        <span class="w-2.5 h-2.5 rounded-full bg-[#FF6B4A] shadow-[0_0_10px_rgba(255,107,74,0.8)]"></span>
-                        <h3 class="text-xs sm:text-sm font-black uppercase tracking-wider text-slate-900 dark:text-white">Desglose Multi Pago</h3>
+        {{-- Header Modal --}}
+        <div class="relative z-10 flex items-center justify-between p-4 border-b border-slate-100 dark:border-[#FF6B4A]/10 shrink-0">
+            <div class="flex items-center gap-3">
+                <span class="w-2.5 h-2.5 rounded-full bg-[#FF6B4A] shadow-[0_0_10px_rgba(255,107,74,0.8)]"></span>
+                <h3 id="modal-multi-pago-title" class="text-xs sm:text-sm font-black uppercase tracking-wider text-slate-900 dark:text-white">Desglose Multi Pago</h3>
+            </div>
+            <button type="button" @click="showPayModal = false"
+                    class="w-8 h-8 rounded-full bg-[#FFF1EC] dark:bg-[#3A120A]/40 hover:bg-[#FFE1D6] dark:hover:bg-[#5C1B0E]/60 text-[#FF6B4A] dark:text-[#FF8A65] font-bold transition flex items-center justify-center cursor-pointer focus:outline-none">
+                ✕
+            </button>
+        </div>
+
+        {{-- Body Modal --}}
+        <div class="p-4 sm:p-6 overflow-y-auto custom-scroll space-y-4">
+            <div class="grid grid-cols-3 gap-2 p-3.5 bg-slate-50 dark:bg-[#0b0f19]/60 rounded-2xl border border-slate-100 dark:border-slate-800/60 text-center">
+                <div>
+                    <span class="text-[10px] font-extrabold uppercase text-slate-400 block">Total Venta</span>
+                    <p class="text-sm sm:text-base font-black text-slate-900 dark:text-white mt-0.5" x-text="'$' + formatNumber(total)"></p>
+                </div>
+                <div>
+                    <span class="text-[10px] font-extrabold uppercase text-slate-400 block">Monto Cubierto</span>
+                    <p class="text-sm sm:text-base font-black text-emerald-500 mt-0.5" x-text="'$' + formatNumber(totalPagado)"></p>
+                </div>
+                <div>
+                    <span class="text-[10px] font-extrabold uppercase text-slate-400 block" x-text="faltante > 0 ? 'Faltante' : 'Cambio'"></span>
+                    <p class="text-sm sm:text-base font-black mt-0.5"
+                       :class="faltante > 0 ? 'text-rose-500' : 'text-amber-500'" 
+                       x-text="'$' + formatNumber(faltante > 0 ? faltante : cambio)"></p>
+                </div>
+            </div>
+
+            <div class="space-y-2.5">
+                <label class="text-xs font-bold text-slate-500 dark:text-slate-400">Métodos de Pago Aplicados</label>
+                
+                {{-- Efectivo --}}
+                <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 bg-slate-50/50 dark:bg-[#0b0f19]/30 p-2.5 rounded-xl border border-slate-200/80 dark:border-slate-800/80">
+                    <div class="sm:w-1/3 text-xs font-bold px-3 py-2 rounded-lg bg-white dark:bg-[#0b0f19] text-slate-800 dark:text-slate-100 flex items-center">
+                        Efectivo
                     </div>
-                    <button type="button" @click="showPayModal = false"
-                            class="w-8 h-8 rounded-full bg-[#FFF1EC] dark:bg-[#3A120A]/40 hover:bg-[#FFE1D6] dark:hover:bg-[#5C1B0E]/60 text-[#FF6B4A] dark:text-[#FF8A65] font-bold transition flex items-center justify-center cursor-pointer">
-                        ✕
-                    </button>
+                    <div class="relative sm:w-1/3">
+                        <span class="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs font-extrabold text-slate-400">$</span>
+                        <input type="number" step="0.01" min="0" x-model.number="pagoEfectivo" 
+                               class="w-full pl-6 pr-2 py-2 text-xs font-extrabold rounded-lg border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0b0f19] text-slate-800 dark:text-slate-100 focus:ring-[#FF6B4A]/20 focus:border-[#F0552F]" placeholder="0.00">
+                    </div>
+                    <div class="sm:w-1/3 text-center text-xs text-slate-400 font-medium">N/A</div>
                 </div>
 
-                {{-- Body --}}
-                <div class="p-4 sm:p-6 overflow-y-auto custom-scroll space-y-4">
-                    <div class="grid grid-cols-3 gap-2 p-3.5 bg-slate-50 dark:bg-[#0b0f19]/60 rounded-2xl border border-slate-100 dark:border-slate-800/60 text-center">
-                        <div>
-                            <span class="text-[10px] font-extrabold uppercase text-slate-400 block">Total Venta</span>
-                            <p class="text-sm sm:text-base font-black text-slate-900 dark:text-white mt-0.5" x-text="'$' + formatNumber(total)"></p>
-                        </div>
-                        <div>
-                            <span class="text-[10px] font-extrabold uppercase text-slate-400 block">Monto Cubierto</span>
-                            <p class="text-sm sm:text-base font-black text-emerald-500 mt-0.5" x-text="'$' + formatNumber(totalPagado)"></p>
-                        </div>
-                        <div>
-                            <span class="text-[10px] font-extrabold uppercase text-slate-400 block" x-text="faltante > 0 ? 'Faltante' : 'Cambio'"></span >
-                            <p class="text-sm sm:text-base font-black mt-0.5"
-                               :class="faltante > 0 ? 'text-rose-500' : 'text-amber-500'" 
-                               x-text="'$' + formatNumber(faltante > 0 ? faltante : cambio)"></p>
-                        </div>
+                {{-- Tarjeta --}}
+                <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 bg-slate-50/50 dark:bg-[#0b0f19]/30 p-2.5 rounded-xl border border-slate-200/80 dark:border-slate-800/80">
+                    <div class="sm:w-1/3 text-xs font-bold px-3 py-2 rounded-lg bg-white dark:bg-[#0b0f19] text-slate-800 dark:text-slate-100 flex items-center">
+                        Tarjeta
                     </div>
-
-                    <div class="space-y-2.5">
-                        <label class="text-xs font-bold text-slate-500 dark:text-slate-400">Métodos de Pago Aplicados</label>
-                        
-                        <template x-for="(pago, index) in pagos" :key="index">
-                            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 bg-slate-50/50 dark:bg-[#0b0f19]/30 p-2.5 rounded-xl border border-slate-200/80 dark:border-slate-800/80">
-                                <select x-model="pago.metodo" 
-                                        class="sm:w-1/3 text-xs font-bold rounded-lg border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0b0f19] text-slate-800 dark:text-slate-100 focus:ring-[#FF6B4A]/20 focus:border-[#F0552F]">
-                                    <option value="efectivo">Efectivo</option>
-                                    <option value="tarjeta">Tarjeta</option>
-                                    <option value="transferencia">Transferencia</option>
-                                </select>
-
-                                <div class="relative sm:w-1/3">
-                                    <span class="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs font-extrabold text-slate-400">$</span>
-                                    <input type="number" 
-                                           step="0.01" 
-                                           min="0"
-                                           x-model.number="pago.monto" 
-                                           class="w-full pl-6 pr-2 py-2 text-xs font-extrabold rounded-lg border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0b0f19] text-slate-800 dark:text-slate-100 focus:ring-[#FF6B4A]/20 focus:border-[#F0552F]" 
-                                           placeholder="0.00">
-                                </div>
-
-                                <div class="flex items-center gap-2 sm:w-1/3">
-                                    <input type="text" 
-                                           x-model="pago.referencia" 
-                                           :placeholder="pago.metodo === 'efectivo' ? 'N/A' : 'Ref / Voucher'"
-                                           :disabled="pago.metodo === 'efectivo'"
-                                           class="w-full text-xs font-medium rounded-lg border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0b0f19] text-slate-800 dark:text-slate-100 disabled:opacity-40 focus:ring-[#FF6B4A]/20 focus:border-[#F0552F]">
-
-                                    <button type="button" 
-                                            @click="removerMetodoPago(index)" 
-                                            :disabled="pagos.length === 1"
-                                            class="text-rose-500 hover:text-rose-600 p-1 font-extrabold disabled:opacity-20 cursor-pointer">
-                                        ✕
-                                    </button>
-                                </div>
-                            </div>
-                        </template>
+                    <div class="relative sm:w-1/3">
+                        <span class="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs font-extrabold text-slate-400">$</span>
+                        <input type="number" step="0.01" min="0" x-model.number="pagoTarjeta" 
+                               class="w-full pl-6 pr-2 py-2 text-xs font-extrabold rounded-lg border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0b0f19] text-slate-800 dark:text-slate-100 focus:ring-[#FF6B4A]/20 focus:border-[#F0552F]" placeholder="0.00">
                     </div>
-
-                    <button type="button" 
-                            @click="agregarMetodoPago()" 
-                            class="w-full py-2.5 text-xs font-extrabold text-[#F0552F] dark:text-[#FF8A65] border border-dashed border-[#F0552F]/40 hover:border-[#F0552F] rounded-xl bg-[#FFF1EC]/50 dark:bg-[#3A120A]/20 transition-colors cursor-pointer">
-                        + Dividir Pago / Agregar Otro Método
-                    </button>
+                    <div class="sm:w-1/3">
+                        <input type="text" x-model="refTarjeta" placeholder="Ref / Voucher" 
+                               class="w-full text-xs font-medium rounded-lg border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0b0f19] text-slate-800 dark:text-slate-100 focus:ring-[#FF6B4A]/20 focus:border-[#F0552F]">
+                    </div>
                 </div>
 
-                {{-- Footer --}}
-                <div class="p-4 border-t border-slate-100 dark:border-[#FF6B4A]/10 shrink-0 bg-slate-50/50 dark:bg-[#0b0f19]/30 flex items-center justify-end gap-3">
-                    <button type="button" 
-                            @click="showPayModal = false" 
-                            class="px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-600 dark:text-slate-300 text-xs font-extrabold transition cursor-pointer">
-                        Cancelar
-                    </button>
-                    <button type="button" 
-                            @click="processSale(true)" 
-                            :disabled="loading || totalPagado < total" 
-                            class="px-6 py-2.5 rounded-xl bg-[#F0552F] hover:bg-[#D9431F] disabled:bg-slate-300 dark:disabled:bg-slate-800 text-white text-xs font-extrabold shadow-md shadow-[#F0552F]/20 transition cursor-pointer flex items-center gap-2 disabled:cursor-not-allowed">
-                        <span x-show="!loading">Confirmar y Registrar Venta</span>
-                        <span x-show="loading" class="inline-block animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" x-cloak></span>
-                    </button>
+                {{-- Transferencia --}}
+                <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 bg-slate-50/50 dark:bg-[#0b0f19]/30 p-2.5 rounded-xl border border-slate-200/80 dark:border-slate-800/80">
+                    <div class="sm:w-1/3 text-xs font-bold px-3 py-2 rounded-lg bg-white dark:bg-[#0b0f19] text-slate-800 dark:text-slate-100 flex items-center">
+                        Transferencia
+                    </div>
+                    <div class="relative sm:w-1/3">
+                        <span class="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs font-extrabold text-slate-400">$</span>
+                        <input type="number" step="0.01" min="0" x-model.number="pagoTransferencia" 
+                               class="w-full pl-6 pr-2 py-2 text-xs font-extrabold rounded-lg border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0b0f19] text-slate-800 dark:text-slate-100 focus:ring-[#FF6B4A]/20 focus:border-[#F0552F]" placeholder="0.00">
+                    </div>
+                    <div class="sm:w-1/3">
+                        <input type="text" x-model="refTransferencia" placeholder="Ref / Voucher" 
+                               class="w-full text-xs font-medium rounded-lg border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0b0f19] text-slate-800 dark:text-slate-100 focus:ring-[#FF6B4A]/20 focus:border-[#F0552F]">
+                    </div>
                 </div>
             </div>
         </div>
+
+        {{-- Footer Modal --}}
+        <div class="p-4 border-t border-slate-100 dark:border-[#FF6B4A]/10 shrink-0 bg-slate-50/50 dark:bg-[#0b0f19]/30 flex items-center justify-end gap-3">
+            <button type="button" 
+                    @click="showPayModal = false" 
+                    class="px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-600 dark:text-slate-300 text-xs font-extrabold transition cursor-pointer focus:outline-none">
+                Cancelar
+            </button>
+            <button type="button" 
+                    @click="processSale(true)" 
+                    :disabled="loading || totalPagado < total" 
+                    class="px-6 py-2.5 rounded-xl bg-[#F0552F] hover:bg-[#D9431F] disabled:bg-slate-300 dark:disabled:bg-slate-800 text-white text-xs font-extrabold shadow-md shadow-[#F0552F]/20 transition cursor-pointer flex items-center gap-2 disabled:cursor-not-allowed focus:outline-none">
+                <span x-show="!loading">Confirmar y Registrar Venta</span>
+                <span x-show="loading" class="inline-block animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" x-cloak aria-hidden="true"></span>
+            </button>
+        </div>
+    </div>
+</div>
 
         {{-- MODAL TICKET --}}
         <div x-show="showTicket" x-cloak
