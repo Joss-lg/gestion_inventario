@@ -12,8 +12,11 @@ class Permission extends Model
 
     protected $fillable = ['name', 'slug', 'module'];
 
-    public function users(): BelongsToMany
+    /**
+     * Relación: Un permiso puede estar asignado a muchos roles.
+     */
+    public function roles(): BelongsToMany
     {
-        return $this->belongsToMany(User::class, 'permission_user');
+        return $this->belongsToMany(Role::class, 'permission_role');
     }
 }

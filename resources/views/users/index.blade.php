@@ -12,21 +12,23 @@
                 <p class="page-subtitle">Administra los accesos, roles y permisos del personal del sistema</p>
             </div>
             <div class="flex items-center gap-2 w-full sm:w-auto">
-                <button type="button" @click="openCreateRoleModal()"
-                    class="bg-[#FF4500] hover:bg-[#E63E00] text-white font-bold rounded-2xl px-5 py-2.5 shadow-md shadow-[#FF4500]/25 active:scale-95 transition w-full sm:w-auto uppercase tracking-wider text-xs cursor-pointer inline-flex items-center justify-center gap-2">
+                <a href="{{ route('roles.index') }}"
+                    class="bg-transparent hover:bg-slate-100 dark:hover:bg-slate-800/60 text-slate-600 dark:text-slate-300 font-bold rounded-2xl px-5 py-2.5 border border-slate-200/80 dark:border-slate-800/80 active:scale-95 transition w-full sm:w-auto uppercase tracking-wider text-xs cursor-pointer inline-flex items-center justify-center gap-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
-                    <span>Crear Rol</span>
-                </button>
-                
-                <button type="button" @click="openCreateModal()"
-                    class="bg-[#FF4500] hover:bg-[#E63E00] text-white font-bold rounded-2xl px-5 py-2.5 shadow-md shadow-[#FF4500]/25 active:scale-95 transition w-full sm:w-auto uppercase tracking-wider text-xs cursor-pointer inline-flex items-center justify-center gap-2">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
-                    </svg>
-                    <span>Nuevo Usuario</span>
-                </button>
+                    <span>Roles y Permisos</span>
+                </a>
+
+                @if(auth()->user()->hasPermission('create-users'))
+                    <button type="button" @click="openCreateModal()"
+                        class="bg-[#FF4500] hover:bg-[#E63E00] text-white font-bold rounded-2xl px-5 py-2.5 shadow-md shadow-[#FF4500]/25 active:scale-95 transition w-full sm:w-auto uppercase tracking-wider text-xs cursor-pointer inline-flex items-center justify-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
+                        </svg>
+                        <span>Nuevo Usuario</span>
+                    </button>
+                @endif
             </div>
         </div>
 
@@ -91,8 +93,8 @@
                                 <div class="flex items-center gap-2">
                                     <div class="flex items-center gap-1">
                                         @php
-                                            $totalPermsCount = count($permissions);
-                                            $userPermCount = $user->permissions->count();
+                                            $totalPermsCount = $totalPermissions;
+                                            $userPermCount = optional($user->role)->permissions->count() ?? 0;
                                         @endphp
                                         @for ($i = 1; $i <= $totalPermsCount; $i++)
                                             <span class="w-1.5 h-1.5 rounded-full {{ $i <= $userPermCount ? 'bg-[#FF6B4A] shadow-xs shadow-[#FF6B4A]' : 'bg-slate-200 dark:bg-slate-800' }}"></span>
@@ -128,11 +130,13 @@
                             </td>
                             <td class="table-td text-right">
                                 <div class="flex items-center justify-end gap-3 whitespace-nowrap">
-                                    <button type="button" @click="setUserData({{ Illuminate\Support\Js::from($user) }}, {{ Illuminate\Support\Js::from($user->permissions->pluck('id')) }})"
-                                        class="p-2 text-[#FF6B4A] dark:text-[#FF8A65] bg-[#FF6B4A]/10 hover:bg-[#FF6B4A]/20 border border-[#FF6B4A]/30 dark:border-[#FF6B4A]/30 rounded-xl transition-all cursor-pointer inline-flex items-center" title="Editar Usuario">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
-                                    </button>
-                                    @if($user->id !== 1)
+                                    @if(auth()->user()->hasPermission('edit-users'))
+                                        <button type="button" @click="setUserData({{ Illuminate\Support\Js::from($user) }})"
+                                            class="p-2 text-[#FF6B4A] dark:text-[#FF8A65] bg-[#FF6B4A]/10 hover:bg-[#FF6B4A]/20 border border-[#FF6B4A]/30 dark:border-[#FF6B4A]/30 rounded-xl transition-all cursor-pointer inline-flex items-center" title="Editar Usuario">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                                        </button>
+                                    @endif
+                                    @if($user->id !== 1 && auth()->user()->hasPermission('delete-users'))
                                         <button type="button" @click="openDeleteModal({{ Illuminate\Support\Js::from($user) }})"
                                             class="p-2 text-rose-500 dark:text-rose-400 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 dark:border-rose-500/30 rounded-xl transition-all cursor-pointer inline-flex items-center" title="Eliminar Usuario">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
@@ -161,11 +165,13 @@
                             </div>
                         </div>
                         <div class="flex items-center gap-3 shrink-0">
-                            <button type="button" @click="setUserData({{ Illuminate\Support\Js::from($user) }}, {{ Illuminate\Support\Js::from($user->permissions->pluck('id')) }})"
-                                class="p-2 text-[#FF6B4A] dark:text-[#FF8A65] bg-[#FF6B4A]/10 hover:bg-[#FF6B4A]/20 border border-[#FF6B4A]/30 dark:border-[#FF6B4A]/30 rounded-xl active:scale-95 transition-all cursor-pointer inline-flex items-center" title="Editar Usuario">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
-                            </button>
-                            @if($user->id !== 1)
+                            @if(auth()->user()->hasPermission('edit-users'))
+                                <button type="button" @click="setUserData({{ Illuminate\Support\Js::from($user) }})"
+                                    class="p-2 text-[#FF6B4A] dark:text-[#FF8A65] bg-[#FF6B4A]/10 hover:bg-[#FF6B4A]/20 border border-[#FF6B4A]/30 dark:border-[#FF6B4A]/30 rounded-xl active:scale-95 transition-all cursor-pointer inline-flex items-center" title="Editar Usuario">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                                </button>
+                            @endif
+                            @if($user->id !== 1 && auth()->user()->hasPermission('delete-users'))
                                 <button type="button" @click="openDeleteModal({{ Illuminate\Support\Js::from($user) }})"
                                     class="p-2 text-rose-500 dark:text-rose-400 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 dark:border-rose-500/30 rounded-xl active:scale-95 transition-all cursor-pointer inline-flex items-center" title="Eliminar Usuario">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
@@ -251,13 +257,6 @@
                                                 <div class="w-8 h-8 rounded-xl flex items-center justify-center {{ $role->name === 'Administrador' ? 'bg-[#FF6B4A]/15 text-[#F0552F] dark:bg-[#FF6B4A]/20 dark:text-[#FF8A65]' : 'bg-emerald-500/15 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400' }}">
                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
                                                 </div>
-                                                
-                                                @if(!in_array(strtolower($role->name), ['administrador', 'cajero']))
-                                                    <button type="button" @click.stop="openDeleteRoleModal({{ $role->id }}, {{ Illuminate\Support\Js::from($role->name) }})"
-                                                        class="p-1.5 text-rose-500 hover:text-rose-600 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 rounded-xl transition-all cursor-pointer" title="Eliminar Rol">
-                                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                                                    </button>
-                                                @endif
                                             </div>
 
                                             <span class="text-xs font-black text-slate-900 dark:text-white">{{ $role->name }}</span>
@@ -285,29 +284,11 @@
                                 </button>
                             </div>
 
-                            {{-- PERMISOS PERSONALIZADOS --}}
-                            <div>
-                                <div class="flex items-center justify-between mb-3">
-                                    <h4 class="text-[10px] font-black uppercase tracking-widest text-[#F0552F] dark:text-[#FF8A65]/80 mb-0">Permisos Personalizados</h4>
-                                    <span class="px-3 py-1 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-[#FF8A65] border border-emerald-500/20 dark:border-[#FF6B4A]/20">
-                                        <span x-text="selectedPermsCount"></span> / {{ count($permissions) }} SELECCIONADOS
-                                    </span>
-                                </div>
-
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                    @foreach($permissions as $permission)
-                                        <label class="flex items-center justify-between p-3 bg-slate-100/60 dark:bg-slate-900/60 hover:bg-slate-100 dark:hover:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 cursor-pointer transition-all">
-                                            <div class="flex items-center gap-2.5">
-                                                <input type="checkbox" name="permissions[]" value="{{ $permission->id }}"
-                                                       x-model.number="currentUserPerms"
-                                                       class="w-4 h-4 rounded border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-[#F0552F] dark:text-[#FF6B4A] focus:ring-0">
-                                                <span class="text-xs font-bold text-slate-800 dark:text-slate-200 block line-clamp-1">{{ $permission->name }}</span>
-                                            </div>
-                                            <span class="w-2 h-2 rounded-full transition-colors shrink-0"
-                                                  :class="currentUserPerms.includes({{ $permission->id }}) ? 'bg-[#F0552F] dark:bg-[#FF6B4A] shadow-[0_0_8px_rgba(255,107,74,0.8)]' : 'bg-slate-300 dark:bg-slate-700'"></span>
-                                        </label>
-                                    @endforeach
-                                </div>
+                            <div class="p-3 bg-slate-100/60 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800/80 rounded-2xl">
+                                <p class="text-[11px] text-slate-500 dark:text-slate-400 font-semibold leading-relaxed">
+                                    Los permisos de este usuario dependen del rol seleccionado.
+                                    <a href="{{ route('roles.index') }}" class="text-[#F0552F] dark:text-[#FF8A65] font-bold underline">Configúralos en Roles y Permisos.</a>
+                                </p>
                             </div>
                         </div>
                     </template>
@@ -322,23 +303,6 @@
             </form>
         </x-modal>
 
-        {{-- MODAL CREAR NUEVO ROL --}}
-        <x-modal name="role" title="Crear Nuevo Rol" maxWidth="max-w-md">
-            <form action="{{ route('roles.store') }}" method="POST" class="relative z-10 flex flex-col flex-1 min-h-0 bg-transparent">
-                @csrf
-                <div class="p-5 sm:p-7 space-y-5 overflow-y-auto flex-1 min-h-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                    <div class="space-y-1.5">
-                        <label class="form-label">Nombre del Rol</label>
-                        <input type="text" name="name" x-model="roleForm.name" required class="form-input" placeholder="Ej. Administrador, Editor">
-                    </div>
-                </div>
-                <div class="flex items-center justify-end gap-3 p-5 sm:px-7 border-t border-slate-100 dark:border-white/5 bg-transparent shrink-0">
-                    <button type="button" @click="closeModal('role')" class="btn-secondary">Cancelar</button>
-                    <button type="submit" class="px-8 py-2.5 rounded-2xl bg-[#FF4500] hover:bg-[#E63E00] text-white font-bold text-xs transition-all shadow-md shadow-[#FF4500]/25 active:scale-95 cursor-pointer">Guardar Rol</button>
-                </div>
-            </form>
-        </x-modal>
-
         {{-- MODAL CONFIRMAR ELIMINACIÓN --}}
         <x-modal name="delete" title="¿Confirmar Eliminación?" maxWidth="max-w-sm" dotColor="bg-rose-500">
             <div class="p-6 text-center">
@@ -346,10 +310,9 @@
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
                 </div>
                 <p class="text-[11px] text-slate-500 dark:text-slate-400 mb-6 font-semibold px-2 leading-relaxed">
-                    <span x-show="formDelete.type === 'user'">Esta acción eliminará de forma irreversible al usuario <strong x-text="formDelete.name"></strong> del sistema.</span>
-                    <span x-show="formDelete.type === 'role'">Esta acción eliminará de forma irreversible el rol <strong x-text="formDelete.name"></strong> del sistema.</span>
+                    Esta acción eliminará de forma irreversible al usuario <strong x-text="formDelete.name"></strong> del sistema.
                 </p>
-                <form :action="formDelete.type === 'role' ? '{{ url('roles') }}/' + formDelete.id : '{{ url('usuarios') }}/' + formDelete.id" method="POST" class="flex gap-3">
+                <form :action="'{{ url('usuarios') }}/' + formDelete.id" method="POST" class="flex gap-3">
                     @csrf
                     @method('DELETE')
                     <button type="button" @click="closeModal('delete')" class="btn-secondary w-1/2 justify-center">Cancelar</button>

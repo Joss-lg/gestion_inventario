@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -41,14 +40,6 @@ class User extends Authenticatable
     }
 
     /**
-     * Relación de muchos a muchos con los permisos personalizados.
-     */
-    public function permissions(): BelongsToMany
-    {
-        return $this->belongsToMany(Permission::class, 'permission_user');
-    }
-
-    /**
      * Relación: Un usuario tiene muchos turnos de caja.
      */
     public function cajaMovimientos(): HasMany
@@ -66,10 +57,15 @@ class User extends Authenticatable
 
     /**
      * Comprobar si el usuario tiene un permiso específico por su slug.
+     * Los permisos ahora dependen del rol asignado, no del usuario individual.
      */
     public function hasPermissionTo(string $permissionSlug): bool
     {
-        return $this->permissions->contains('slug', $permissionSlug);
+        if (! $this->role) {
+            return false;
+        }
+
+        return $this->role->hasPermissionTo($permissionSlug);
     }
 
     /**

@@ -14,10 +14,12 @@
             <p class="page-subtitle">Catálogo completo de productos e inventario global en tiempo real.</p>
         </div>
         
-        <button @click="openCreateModal()" class="bg-[#FF4500] hover:bg-[#E63E00] text-white font-bold rounded-2xl px-5 py-2.5 shadow-md shadow-[#FF4500]/25 active:scale-95 transition w-full sm:w-auto uppercase tracking-wider text-xs cursor-pointer inline-flex items-center justify-center gap-2">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
-            <span>Registrar Producto</span>
-        </button>
+        @if(auth()->user()->hasPermission('create-products'))
+            <button @click="openCreateModal()" class="bg-[#FF4500] hover:bg-[#E63E00] text-white font-bold rounded-2xl px-5 py-2.5 shadow-md shadow-[#FF4500]/25 active:scale-95 transition w-full sm:w-auto uppercase tracking-wider text-xs cursor-pointer inline-flex items-center justify-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                <span>Registrar Producto</span>
+            </button>
+        @endif
     </div>
 
     {{-- TABLA / TARJETAS --}}
@@ -65,14 +67,18 @@
                     </div>
 
                     <div class="flex items-center gap-2">
-                        <button @click="openEditModal({{ $product->id }}, '{{ addslashes($product->name) }}', '{{ $product->category_id ?? '' }}', {{ $product->price }}, {{ $product->stock }}, '{{ $product->sku ?? '' }}')" 
-                                class="w-9 h-9 rounded-xl bg-[#FF6B4A]/10 hover:bg-[#FF6B4A]/20 border border-[#FF6B4A]/20 text-[#F0552F] dark:text-[#FF8A65] flex items-center justify-center transition-all cursor-pointer shadow-xs">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 4H6a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                        </button>
-                        <button @click="openDeleteModal({{ $product->id }})" 
-                                class="w-9 h-9 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 text-rose-500 flex items-center justify-center transition-all cursor-pointer shadow-xs">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3.75h6a.75.75 0 01.75.75v.75h3.75a.75.75 0 010 1.5h-.588l-.83 12.451A2.25 2.25 0 0115.887 21H8.113a2.25 2.25 0 01-2.245-2.049L5.038 6.75H4.5a.75.75 0 010-1.5h3.75V4.5A.75.75 0 019 3.75zM9.75 9.75a.75.75 0 00-1.5 0v7.5a.75.75 0 001.5 0v-7.5zm3-.75a.75.75 0 01.75.75v7.5a.75.75 0 01-1.5 0v-7.5a.75.75 0 01.75-.75zm3.75.75a.75.75 0 00-1.5 0v7.5a.75.75 0 001.5 0v-7.5z"/></svg>
-                        </button>
+                        @if(auth()->user()->hasPermission('edit-products'))
+                            <button @click="openEditModal({{ $product->id }}, '{{ addslashes($product->name) }}', '{{ $product->category_id ?? '' }}', {{ $product->price }}, {{ $product->stock }}, '{{ $product->sku ?? '' }}')" 
+                                    class="w-9 h-9 rounded-xl bg-[#FF6B4A]/10 hover:bg-[#FF6B4A]/20 border border-[#FF6B4A]/20 text-[#F0552F] dark:text-[#FF8A65] flex items-center justify-center transition-all cursor-pointer shadow-xs">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 4H6a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                            </button>
+                        @endif
+                        @if(auth()->user()->hasPermission('delete-products'))
+                            <button @click="openDeleteModal({{ $product->id }})" 
+                                    class="w-9 h-9 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 text-rose-500 flex items-center justify-center transition-all cursor-pointer shadow-xs">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3.75h6a.75.75 0 01.75.75v.75h3.75a.75.75 0 010 1.5h-.588l-.83 12.451A2.25 2.25 0 0115.887 21H8.113a2.25 2.25 0 01-2.245-2.049L5.038 6.75H4.5a.75.75 0 010-1.5h3.75V4.5A.75.75 0 019 3.75zM9.75 9.75a.75.75 0 00-1.5 0v7.5a.75.75 0 001.5 0v-7.5zm3-.75a.75.75 0 01.75.75v7.5a.75.75 0 01-1.5 0v-7.5a.75.75 0 01.75-.75zm3.75.75a.75.75 0 00-1.5 0v7.5a.75.75 0 001.5 0v-7.5z"/></svg>
+                            </button>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -118,14 +124,18 @@
                         <td class="table-td font-bold text-slate-700 dark:text-slate-400 tabular-nums">{{ $product->stock }} u.</td>
                         <td class="table-td text-right whitespace-nowrap">
                             <div class="inline-flex items-center gap-2">
+                                @if(auth()->user()->hasPermission('edit-products'))
                                 <button @click="openEditModal({{ $product->id }}, '{{ addslashes($product->name) }}', '{{ $product->category_id ?? '' }}', {{ $product->price }}, {{ $product->stock }}, '{{ $product->sku ?? '' }}')" 
                                         class="w-9 h-9 rounded-xl bg-[#FF6B4A]/10 hover:bg-[#FF6B4A]/20 border border-[#FF6B4A]/20 text-[#F0552F] dark:text-[#FF8A65] inline-flex items-center justify-center transition-all cursor-pointer shadow-xs" title="Editar producto">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 4H6a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                                 </button>
-                                <button @click="openDeleteModal({{ $product->id }})" 
-                                        class="w-9 h-9 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 text-rose-500 inline-flex items-center justify-center transition-all cursor-pointer shadow-xs" title="Eliminar producto">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3.75h6a.75.75 0 01.75.75v.75h3.75a.75.75 0 010 1.5h-.588l-.83 12.451A2.25 2.25 0 0115.887 21H8.113a2.25 2.25 0 01-2.245-2.049L5.038 6.75H4.5a.75.75 0 010-1.5h3.75V4.5A.75.75 0 019 3.75zM9.75 9.75a.75.75 0 00-1.5 0v7.5a.75.75 0 001.5 0v-7.5zm3-.75a.75.75 0 01.75.75v7.5a.75.75 0 01-1.5 0v-7.5a.75.75 0 01.75-.75zm3.75.75a.75.75 0 00-1.5 0v7.5a.75.75 0 001.5 0v-7.5z"/></svg>
-                                </button>
+                            @endif
+                                @if(auth()->user()->hasPermission('delete-products'))
+                                    <button @click="openDeleteModal({{ $product->id }})" 
+                                            class="w-9 h-9 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 text-rose-500 inline-flex items-center justify-center transition-all cursor-pointer shadow-xs" title="Eliminar producto">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3.75h6a.75.75 0 01.75.75v.75h3.75a.75.75 0 010 1.5h-.588l-.83 12.451A2.25 2.25 0 0115.887 21H8.113a2.25 2.25 0 01-2.245-2.049L5.038 6.75H4.5a.75.75 0 010-1.5h3.75V4.5A.75.75 0 019 3.75zM9.75 9.75a.75.75 0 00-1.5 0v7.5a.75.75 0 001.5 0v-7.5zm3-.75a.75.75 0 01.75.75v7.5a.75.75 0 01-1.5 0v-7.5a.75.75 0 01.75-.75zm3.75.75a.75.75 0 00-1.5 0v7.5a.75.75 0 001.5 0v-7.5z"/></svg>
+                                    </button>
+                                @endif
                             </div>
                         </td>
                     </tr>
@@ -224,13 +234,21 @@
                         <input type="number" step="0.01" x-model="formEdit.price" name="price" class="form-input" required>
                     </div>
                     <div class="space-y-1.5">
-                        <label class="form-label">Stock</label>
-                        <input type="number" x-model="formEdit.stock" name="stock" class="form-input" required>
+                        <label class="form-label">Stock <span class="text-slate-400 dark:text-slate-500 font-normal lowercase">(solo lectura)</span></label>
+                        <input type="number" x-model="formEdit.stock" class="form-input bg-slate-100 dark:bg-slate-900/60 text-slate-400 dark:text-slate-500 cursor-not-allowed" disabled>
                     </div>
                     <div class="space-y-1.5">
                         <label class="form-label">SKU</label>
                         <input type="text" x-model="formEdit.sku" name="sku" class="form-input uppercase" required>
                     </div>
+                </div>
+
+                <div class="p-3 bg-slate-100/60 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800/80 rounded-2xl">
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400 font-semibold leading-relaxed">
+                        Para ajustar la cantidad de stock usa el módulo
+                        <a href="{{ route('stock.index') }}" class="text-[#F0552F] dark:text-[#FF8A65] font-bold underline">Movimientos de Stock</a>,
+                        así queda registrado el motivo del ajuste.
+                    </p>
                 </div>
 
                 <div class="space-y-1.5">

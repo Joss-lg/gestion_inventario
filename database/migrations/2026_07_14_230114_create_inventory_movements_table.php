@@ -15,7 +15,10 @@ return new class extends Migration
             $table->id();
 
             // Relaciones con tablas existentes
-            $table->foreignId('product_id')->nullable()->constrained('products')->onDelete('cascade');
+            // 🛡️ 'restrict' (no 'cascade'): si un producto ya tiene historial de
+            // movimientos (ventas, entradas, salidas), no se permite borrarlo,
+            // para no perder el rastro contable de cortes de caja ya cerrados.
+            $table->foreignId('product_id')->nullable()->constrained('products')->onDelete('restrict');
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
 
             // Guardamos caja_id como campo numérico simple sin FK directa

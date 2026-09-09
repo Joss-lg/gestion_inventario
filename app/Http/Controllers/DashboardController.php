@@ -15,12 +15,11 @@ class DashboardController extends Controller
         $user = auth()->user();
 
         // 🛑 CONTROL DE ACCESO ABSOLUTO:
-        // Si es Operador (por rol) o NO tiene el permiso para ver métricas/reportes,
-        // lo redirigimos de inmediato al Control de Caja SIN MOSTRAR ALERTAS.
+        // Si NO tiene el permiso para ver métricas/reportes, lo redirigimos de
+        // inmediato al Control de Caja SIN MOSTRAR ALERTAS.
         $esAdmin = $user->isAdmin();
-        $esOperador = ($user->role && $user->role->name === 'Operador');
 
-        if ($esOperador || (! $esAdmin && ! $user->hasPermission('view-reports'))) {
+        if (! $esAdmin && ! $user->hasPermission('view-reports')) {
             return redirect()->route('caja.index');
         }
 

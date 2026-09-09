@@ -188,7 +188,7 @@
                     @endif
 
                     {{-- Catálogo y movimientos de stock dependen de sus permisos. --}}
-                    @canany(['manage-products', 'register-movements', 'manage-categories'])
+                    @if(auth()->user()->hasPermission('view-products') || auth()->user()->hasPermission('view-categories') || auth()->user()->hasPermission('view-stock'))
                         @if($puedeVerModulos)
                             <a href="{{ route('catalogo.index') }}" 
                                title="Catálogo"
@@ -199,27 +199,27 @@
                                 <span class="sidebar-label truncate">Catálogo</span>
                             </a>
                         @endif
-                    @endcanany
+                    @endif
 
-                    @can('manage-categories')
+                    @if(auth()->user()->hasPermission('view-categories'))
                         <a href="{{ route('categories.index') }}" 
                            title="Categorías"
                            class="flex items-center gap-3.5 py-2.5 px-3.5 rounded-xl text-sm font-semibold whitespace-nowrap transition-colors {{ request()->routeIs('categories.*') ? 'bg-[#FF4500] text-white shadow-md shadow-[#FF4500]/20' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60 hover:text-slate-900 dark:hover:text-white' }}">
                             <svg class="w-5 h-5 flex-shrink-0 {{ request()->routeIs('categories.*') ? 'text-white' : 'text-[#FF6B4A] dark:text-[#FF8A65]' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
                             <span class="sidebar-label truncate">Categorías</span>
                         </a>
-                    @endcan
+                    @endif
 
-                    @can('manage-products')
+                    @if(auth()->user()->hasPermission('view-products'))
                         <a href="{{ route('products.index') }}" 
                            title="Productos"
                            class="flex items-center gap-3.5 py-2.5 px-3.5 rounded-xl text-sm font-semibold whitespace-nowrap transition-colors {{ request()->routeIs('products.*') ? 'bg-[#FF4500] text-white shadow-md shadow-[#FF4500]/20' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60 hover:text-slate-900 dark:hover:text-white' }}">
                             <svg class="w-5 h-5 flex-shrink-0 {{ request()->routeIs('products.*') ? 'text-white' : 'text-[#FF6B4A] dark:text-[#FF8A65]' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7v10l8 4"/></svg>
                             <span class="sidebar-label truncate">Productos</span>
                         </a>
-                    @endcan
+                    @endif
 
-                    @can('register-movements')
+                    @if(auth()->user()->hasPermission('view-stock'))
                         @if($puedeVerModulos)
                             <a href="{{ route('stock.index') }}" 
                                title="Movimientos de Stock"
@@ -228,7 +228,7 @@
                                 <span class="sidebar-label truncate">Movimientos Stock</span>
                             </a>
                         @endif
-                    @endcan
+                    @endif
                 </div>
                 @endif
 
@@ -269,32 +269,43 @@
                     </a>
 
                     @if($puedeVerModulos)
-                    @can('manage-users')
+                    @if(auth()->user()->hasPermission('view-caja-historial'))
                         <a href="{{ route('caja.historial') }}" 
                            title="Historial de Turnos"
                            class="flex items-center gap-3.5 py-2.5 px-3.5 rounded-xl text-sm font-semibold whitespace-nowrap transition-colors {{ request()->routeIs('caja.historial*') ? 'bg-[#FF4500] text-white shadow-md shadow-[#FF4500]/20' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60 hover:text-slate-900 dark:hover:text-white' }}">
                             <svg class="w-5 h-5 flex-shrink-0 {{ request()->routeIs('caja.historial*') ? 'text-white' : 'text-amber-500 dark:text-amber-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                             <span class="sidebar-label truncate">Historial Turnos</span>
                         </a>
-                    @endcan
+                    @endif
                     @endif
                 </div>
 
                 {{-- SECCIÓN 4: ADMINISTRACIÓN --}}
-                @can('manage-users')
+                @if(auth()->user()->hasPermission('view-users') || auth()->user()->hasPermission('view-roles'))
                     <div class="space-y-1">
                         <p class="sidebar-label px-3 text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2 truncate">
                             Ajustes
                         </p>
 
+                        @if(auth()->user()->hasPermission('view-users'))
                         <a href="{{ route('users.index') }}" 
                            title="Gestión de Usuarios"
                            class="flex items-center gap-3.5 py-2.5 px-3.5 rounded-xl text-sm font-semibold whitespace-nowrap transition-colors {{ request()->routeIs('users.*') ? 'bg-[#FF4500] text-white shadow-md shadow-[#FF4500]/20' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60 hover:text-slate-900 dark:hover:text-white' }}">
                             <svg class="w-5 h-5 flex-shrink-0 {{ request()->routeIs('users.*') ? 'text-white' : 'text-[#FF6B4A] dark:text-[#FF8A65]' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
                             <span class="sidebar-label truncate">Gestión Usuarios</span>
                         </a>
+                        @endif
+
+                        @if(auth()->user()->hasPermission('view-roles'))
+                        <a href="{{ route('roles.index') }}"
+                           title="Roles y Permisos"
+                           class="flex items-center gap-3.5 py-2.5 px-3.5 rounded-xl text-sm font-semibold whitespace-nowrap transition-colors {{ request()->routeIs('roles.*') ? 'bg-[#FF4500] text-white shadow-md shadow-[#FF4500]/20' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60 hover:text-slate-900 dark:hover:text-white' }}">
+                            <svg class="w-5 h-5 flex-shrink-0 {{ request()->routeIs('roles.*') ? 'text-white' : 'text-[#FF6B4A] dark:text-[#FF8A65]' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                            <span class="sidebar-label truncate">Roles y Permisos</span>
+                        </a>
+                        @endif
                     </div>
-                @endcan
+                @endif
 
             </nav>
 

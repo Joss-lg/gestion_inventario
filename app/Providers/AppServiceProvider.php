@@ -22,38 +22,17 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         // =========================================================================
-        // 1. SUPER ADMINISTRADOR (Acceso total automático sin restricciones)
+        // SUPER ADMINISTRADOR (Acceso total automático sin restricciones)
         // =========================================================================
+        // Las rutas se protegen con el middleware 'permission' (CheckPermission) y
+        // las vistas consultan directamente $user->hasPermission('slug'), que ya
+        // hace este mismo bypass para administradores. Este Gate::before se deja
+        // como respaldo por si en el futuro se usa Gate/@can/authorize() en algún
+        // punto del código (policies, form requests, etc.).
         Gate::before(function (User $user) {
             if ($user->isAdmin()) {
                 return true;
             }
-        });
-
-        // =========================================================================
-        // 2. GESTIÓN DE USUARIOS (Independiente del estado de la caja)
-        // =========================================================================
-        Gate::define('manage-users', function (User $user) {
-            return $user->hasPermission('manage-users');
-        });
-
-        // =========================================================================
-        // 3. GATES OPERATIVOS (La caja solo se exige para ventas y gastos)
-        // =========================================================================
-
-        // Permiso para Categorías
-        Gate::define('manage-categories', function (User $user) {
-            return $user->hasPermission('manage-categories');
-        });
-
-        // Permiso para Productos
-        Gate::define('manage-products', function (User $user) {
-            return $user->hasPermission('manage-products');
-        });
-
-        // Permiso para Movimientos de Inventario / Stock
-        Gate::define('register-movements', function (User $user) {
-            return $user->hasPermission('register-movements');
         });
     }
 }

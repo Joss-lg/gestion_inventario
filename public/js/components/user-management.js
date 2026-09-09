@@ -21,58 +21,16 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // 2. Componente Alpine.js para la Gestión de Usuarios
+// Los permisos ahora se gestionan por rol (ver roleManagement en /roles),
+// este componente ya no maneja permisos ni roles individuales.
 document.addEventListener('alpine:init', () => {
     Alpine.data('userManagement', () => ({
-        modals: { user: false, role: false, delete: false },
+        modals: { user: false, delete: false },
         isEditMode: false,
         currentUser: { id: null, name: '', email: '', role_id: 2, is_active: true },
-        currentUserPerms: [],
-        roleForm: { name: '', description: '', is_active: true },
-        rolePerms: [],
 
-        // Objeto único para manejar la eliminación (sirve para usuario Y rol)
-        formDelete: { id: null, name: '', type: 'user' },
-
-        get selectedPermsCount() { 
-            return Array.isArray(this.currentUserPerms) ? this.currentUserPerms.length : 0; 
-        },
-        get selectedRolePermsCount() { 
-            return Array.isArray(this.rolePerms) ? this.rolePerms.length : 0; 
-        },
-
-        // --- LÓGICA DE VISIBILIDAD Y TABLA DE PERMISOS POR MÓDULO ---
-
-        /**
-         * Verifica si un permiso específico está activo en el usuario actual.
-         * Se asegura de comparar los elementos convirtiéndolos a números de forma limpia.
-         */
-        hasPermission(permId) {
-            if (!permId || permId === 0) return false;
-            const targetId = Number(permId);
-            return this.currentUserPerms.some(id => Number(id) === targetId);
-        },
-
-        /**
-         * Controla el toggle del permiso 'Ver' (Visibilidad).
-         * Si se desmarca 'Ver', limpia automáticamente los permisos hijos asociados (Crear, Editar, Borrar).
-         */
-        handleViewToggle(viewPermId, childPermIds = []) {
-            if (!viewPermId) return;
-            
-            this.$nextTick(() => {
-                const isViewActive = this.hasPermission(viewPermId);
-                
-                if (!isViewActive) {
-                    const childIdsClean = (Array.isArray(childPermIds) ? childPermIds : [])
-                        .filter(id => id !== null && id !== undefined)
-                        .map(id => Number(id));
-
-                    this.currentUserPerms = this.currentUserPerms.filter(
-                        id => !childIdsClean.includes(Number(id))
-                    );
-                }
-            });
-        },
+        // Objeto para manejar la eliminación de usuarios
+        formDelete: { id: null, name: '' },
 
         // --- APERTURA Y CONTROL DE MODALES ---
 
@@ -88,23 +46,17 @@ document.addEventListener('alpine:init', () => {
                 return;
             }
 
-            this.formDelete = { id: user.id, name: user.name || '', type: 'user' };
-            this.modals.delete = true;
-        },
-
-        openDeleteRoleModal(roleId, roleName) {
-            this.formDelete = { id: roleId, name: roleName || '', type: 'role' };
+            this.formDelete = { id: user.id, name: user.name || '' };
             this.modals.delete = true;
         },
 
         openCreateModal() {
             this.isEditMode = false;
             this.currentUser = { id: null, name: '', email: '', role_id: 2, is_active: true };
-            this.currentUserPerms = [];
             this.modals.user = true;
         },
 
-        setUserData(user, userPermsIds) {
+        setUserData(user) {
             if (!user) return;
             this.isEditMode = true;
             this.currentUser = {
@@ -114,14 +66,7 @@ document.addEventListener('alpine:init', () => {
                 role_id: user.role_id ? parseInt(user.role_id, 10) : 2,
                 is_active: user.is_active === undefined ? true : Boolean(Number(user.is_active))
             };
-            this.currentUserPerms = Array.isArray(userPermsIds) ? userPermsIds.map(id => parseInt(id, 10)) : [];
             this.modals.user = true;
-        },
-
-        openCreateRoleModal() {
-            this.roleForm = { name: '', description: '', is_active: true };
-            this.rolePerms = [];
-            this.modals.role = true;
         },
 
         closeModal(name) {

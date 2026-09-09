@@ -13,9 +13,11 @@
                     <h1 class="page-title">Movimientos de Stock</h1>
                     <p class="page-subtitle">Registra entradas y salidas operativas para el control del taller</p>
                 </div>
-                <button type="button" @click="openCreateModal()" class="btn-primary w-full sm:w-auto uppercase tracking-wider cursor-pointer">
-                    <span>Registrar Movimiento</span>
-                </button>
+                @if(auth()->user()->hasPermission('create-stock'))
+                    <button type="button" @click="openCreateModal()" class="btn-primary w-full sm:w-auto uppercase tracking-wider cursor-pointer">
+                        <span>Registrar Movimiento</span>
+                    </button>
+                @endif
             </div>
         </div>
 

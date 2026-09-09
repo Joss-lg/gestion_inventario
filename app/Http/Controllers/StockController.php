@@ -6,7 +6,6 @@ use App\Models\InventoryMovement;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Gate;
 
 class StockController extends Controller
 {
@@ -18,8 +17,9 @@ class StockController extends Controller
         // Construimos la consulta base
         $query = InventoryMovement::with(['product', 'user'])->orderByDesc('id');
 
-        // Si el usuario no es admin (o no tiene permiso 'manage-users'), solo ve sus movimientos
-        if (Gate::denies('manage-users')) {
+        // Si el usuario no tiene 'view-users' (indicador de rol administrativo/supervisor),
+        // solo ve sus propios movimientos
+        if (! $user->hasPermission('view-users')) {
             $query->where('user_id', $user->id);
         }
 

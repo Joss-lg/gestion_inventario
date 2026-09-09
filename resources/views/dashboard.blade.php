@@ -53,6 +53,7 @@
     <!-- TARJETAS DE MÉTRICAS -->
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
         
+        @if(auth()->user()->hasPermission('view-inventory-value'))
         <!-- Valor Total del Inventario (tarjeta principal de marca) -->
         <div class="group relative flex flex-col justify-between overflow-hidden rounded-3xl border border-[#FF6B4A]/30 bg-gradient-to-br from-[#FFF4EE] via-white to-white p-6 shadow-lg shadow-[#FF6B4A]/10 backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[#FF6B4A]/20 dark:border-[#FF6B4A]/30 dark:!bg-none dark:bg-slate-900/60">
             <div class="absolute inset-y-0 left-0 w-1.5 bg-gradient-to-b from-[#FF4500] to-[#FF6B4A]"></div>
@@ -65,6 +66,7 @@
                 <p class="mt-1 text-xs font-bold text-slate-500 dark:text-slate-400">Valor total del inventario</p>
             </div>
         </div>
+        @endif
 
         <!-- Dinero Total en Ventas del Mes -->
         <div class="group flex flex-col justify-between rounded-3xl border border-emerald-500/20 bg-white/60 p-6 shadow-lg shadow-emerald-500/5 backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/80 hover:shadow-emerald-500/10 dark:border-emerald-500/30 dark:bg-slate-900/60 dark:hover:bg-slate-900/80">

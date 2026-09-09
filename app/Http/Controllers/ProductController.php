@@ -124,6 +124,14 @@ class ProductController extends Controller
      */
     public function destroy(Product $product)
     {
+        // Validación de seguridad: si el producto ya tiene historial de movimientos
+        // (ventas, entradas, salidas), no se permite borrarlo para no perder el
+        // rastro contable de cortes de caja e historial de turnos ya cerrados.
+        if ($product->movements()->exists()) {
+            return redirect()->route('products.index')
+                ->with('error', 'No se puede eliminar este producto porque ya tiene historial de ventas o movimientos de inventario.');
+        }
+
         if ($product->image) {
             Storage::disk('public')->delete(str_replace('storage/', '', $product->image));
         }
