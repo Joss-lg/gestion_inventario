@@ -32,10 +32,8 @@ class CatalogController extends Controller
         }
 
         // 4. Obtener productos paginados ordenados por fecha de creación (últimos agregados)
-        $products = $query->latest()
-            ->paginate(12)
-            ->withQueryString();
-
+       $products = $query->latest()->get();
+       
         // 5. Obtener categorías activas/existentes con el conteo de sus productos
         $categories = Category::withCount('products')
             ->orderBy('name', 'asc')
