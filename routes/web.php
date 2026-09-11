@@ -69,14 +69,10 @@ Route::middleware('auth')->group(function () {
     Route::middleware('permission:view-caja-historial')->group(function () {
         Route::get('/caja/historial', [CajaController::class, 'historial'])->name('caja.historial');
         Route::get('/caja/historial/{id}', [CajaController::class, 'detallesHistorial'])->name('caja.historial.detalles');
-        Route::get('/caja/historial/{id}/detalles', [CajaController::class, 'detallesHistorial']);
+
     });
 
-    /**
-     *--------------------------------------------------------------------------
-     * 📦 GESTIÓN DE INVENTARIO (LIBRE — NO requiere caja abierta)
-     *--------------------------------------------------------------------------
-     */
+
 
     // Catálogo de Consulta
     Route::middleware('permission:view-products|view-categories')->group(function () {

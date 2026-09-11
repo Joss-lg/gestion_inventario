@@ -55,16 +55,6 @@ class ProductController extends Controller
     }
 
     /**
-     * Mostrar formulario de creación cargando las categorías disponibles.
-     */
-    public function create()
-    {
-        $categories = Category::all();
-
-        return view('products.create', compact('categories'));
-    }
-
-    /**
      * Guardar un nuevo producto con su imagen.
      */
     public function store(StoreProductRequest $request)
@@ -79,24 +69,6 @@ class ProductController extends Controller
 
         return redirect()->route('products.index')
             ->with('success', 'Producto registrado correctamente.');
-    }
-
-    /**
-     * Mostrar un producto específico.
-     */
-    public function show(Product $product)
-    {
-        return view('products.show', compact('product'));
-    }
-
-    /**
-     * Formulario de edición.
-     */
-    public function edit(Product $product)
-    {
-        $categories = Category::all();
-
-        return view('products.edit', compact('product', 'categories'));
     }
 
     /**

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreCategoryRequest;
 use App\Models\Category;
 use Illuminate\Http\Request;
 
@@ -18,44 +19,14 @@ class CategoryController extends Controller
     }
 
     /**
-     * Mostrar el formulario para crear una nueva categoría.
-     * Nota: No se usa directamente si manejas todo por modales, pero se deja por compatibilidad.
-     */
-    public function create()
-    {
-        return view('categories.create');
-    }
-
-    /**
      * Guardar una nueva categoría en la base de datos.
      */
-    public function store(Request $request)
+    public function store(StoreCategoryRequest $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255|unique:categories,name',
-            'description' => 'nullable|string|max:1000',
-        ]);
-
-        Category::create($request->only(['name', 'description']));
+        Category::create($request->validated());
 
         return redirect()->route('categories.index')
             ->with('success', 'Categoría creada con éxito.');
-    }
-
-    /**
-     * Mostrar una categoría específica.
-     */
-    public function show(Category $category)
-    {
-        return view('categories.show', compact('category'));
-    }
-
-    /**
-     * Mostrar el formulario para editar una categoría existente.
-     */
-    public function edit(Category $category)
-    {
-        return view('categories.edit', compact('category'));
     }
 
     /**
