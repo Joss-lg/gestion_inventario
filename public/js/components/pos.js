@@ -27,6 +27,11 @@ document.addEventListener('alpine:init', () => {
         refTransferencia: '',
 
         init() {
+            // Ajuste automático: al mover tarjeta o transferencia,
+            // el efectivo se recalcula con lo que falta del total.
+            this.$watch('pagoTarjeta', () => this.ajustarEfectivo());
+            this.$watch('pagoTransferencia', () => this.ajustarEfectivo());
+
             this.$nextTick(() => {
                 if (this.$refs.searchInput) {
                     this.$refs.searchInput.focus();
@@ -77,16 +82,24 @@ document.addEventListener('alpine:init', () => {
             this.showPayModal = false;
         },
 
+        ajustarEfectivo() {
+            if (!this.showPayModal) return;
+            const tarjeta = Math.max(0, parseFloat(this.pagoTarjeta) || 0);
+            const transferencia = Math.max(0, parseFloat(this.pagoTransferencia) || 0);
+            const restante = this.total - tarjeta - transferencia;
+            this.pagoEfectivo = restante > 0 ? parseFloat(restante.toFixed(2)) : 0;
+        },
+
         abrirModalCobro() {
             if (this.cart.length === 0) return;
             this.isMultiPayMode = true;
             // Limpia y precarga el total completo en efectivo por defecto
-            this.pagoEfectivo = parseFloat(this.total.toFixed(2));
             this.pagoTarjeta = 0;
             this.refTarjeta = '';
             this.pagoTransferencia = 0;
             this.refTransferencia = '';
             this.showPayModal = true;
+            this.pagoEfectivo = parseFloat(this.total.toFixed(2));
         },
 
         // === LÓGICA DE BADGES Y CARRITO ===
