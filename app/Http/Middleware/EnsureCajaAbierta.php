@@ -24,6 +24,10 @@ class EnsureCajaAbierta
             return $next($request);
         }
 
+        if (! $user->hasPermission('access-pos')) {
+            return $next($request);
+        }
+
         // Los usuarios operativos necesitan una caja abierta para continuar.
         if (! $user->cajaActiva()) {
 

@@ -164,7 +164,7 @@
 
             {{-- NAVEGACIÓN Y SECCIONES --}}
             <nav class="flex-1 px-3 py-4 space-y-6 overflow-y-auto overflow-x-hidden">
-                @php($puedeVerModulos = auth()->user()->isAdmin() || auth()->user()->cajaActiva())
+                @php($puedeVerModulos = auth()->user()->isAdmin() || !auth()->user()->hasPermission('access-pos') || auth()->user()->cajaActiva())
                 
                 {{-- SECCIÓN 1: PRINCIPAL --}}
                 <div class="space-y-1">
@@ -233,6 +233,7 @@
                 @endif
 
                 {{-- SECCIÓN 3: VENTAS Y CAJA --}}
+                @if(auth()->user()->isAdmin() || auth()->user()->hasPermission('access-pos'))
                 <div class="space-y-1">
                     @if($puedeVerModulos)
                         <p class="sidebar-label px-3 text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2 truncate">
@@ -279,6 +280,7 @@
                     @endif
                     @endif
                 </div>
+                @endif
 
                 {{-- SECCIÓN 4: ADMINISTRACIÓN --}}
                 @if(auth()->user()->hasPermission('view-users') || auth()->user()->hasPermission('view-roles'))

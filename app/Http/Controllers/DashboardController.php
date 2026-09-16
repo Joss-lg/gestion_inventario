@@ -19,7 +19,7 @@ class DashboardController extends Controller
         // inmediato al Control de Caja SIN MOSTRAR ALERTAS.
         $esAdmin = $user->isAdmin();
 
-        if (! $esAdmin && ! $user->hasPermission('view-reports')) {
+        if (! $esAdmin && ! $user->hasPermission('view-reports') && $user->hasPermission('access-pos')) {
             return redirect()->route('caja.index');
         }
 

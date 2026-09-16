@@ -37,9 +37,11 @@ Route::middleware('auth')->group(function () {
      * Módulo Operativo: Control de Caja (Aperturas / Cierres del Turno Actual)
      *--------------------------------------------------------------------------
      */
-    Route::get('/caja', [CajaController::class, 'index'])->name('caja.index');
-    Route::post('/caja/abrir', [CajaController::class, 'abrir'])->name('caja.abrir');
-    Route::post('/caja/cerrar', [CajaController::class, 'cerrar'])->name('caja.cerrar');
+    Route::middleware('permission:access-pos')->group(function () {
+        Route::get('/caja', [CajaController::class, 'index'])->name('caja.index');
+        Route::post('/caja/abrir', [CajaController::class, 'abrir'])->name('caja.abrir');
+        Route::post('/caja/cerrar', [CajaController::class, 'cerrar'])->name('caja.cerrar');
+    });
 
     /**
      *--------------------------------------------------------------------------
@@ -66,7 +68,7 @@ Route::middleware('auth')->group(function () {
      * 🛡️ Historial de Turnos y Cajas (Soporta ambas estructuras de URL para evitar 404)
      *--------------------------------------------------------------------------
      */
-    Route::middleware('permission:view-caja-historial')->group(function () {
+    Route::middleware(['permission:access-pos', 'permission:view-caja-historial'])->group(function () {
         Route::get('/caja/historial', [CajaController::class, 'historial'])->name('caja.historial');
         Route::get('/caja/historial/{id}', [CajaController::class, 'detallesHistorial'])->name('caja.historial.detalles');
 
